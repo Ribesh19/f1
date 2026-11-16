@@ -301,7 +301,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   <img class="uni" src="assets/bcu-white.png" alt="Birmingham City University">
   <span id="voteStat" title="Live voting. Click to stop presenting votes on this computer." hidden></span>
   <button id="voteReset" type="button" hidden>Clear votes</button>
-  <button id="hostBtn" type="button" hidden>Start live vote</button>
+  <button id="hostBtn" type="button" title="For the presenter: switches on live voting from this copy of the slides">Start live vote</button>
   <span id="clock" title="Session clock">00:00</span>
   <button id="startClock" type="button">Start clock</button>
   <button id="toggleNotes" type="button" aria-pressed="false">Notes (N)</button>
@@ -393,7 +393,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
       <p class="muted small nohost">Answer on your phone. The room's answers show on the big screen.</p>
     </div>
   </div>
-  <p class="notes">Wait here until the bars stop moving. Say: "Scan it once and leave it open. Every question I ask today will appear on your phone by itself." Read the room from the bars: if most say Never, slow down in the hands-on. Voting only runs from your own copy of this page: open it once with ?host on the end of the address and enter the PIN. If the bars stay empty, carry on: every later slide still works without votes.</p>
+  <p class="notes">Wait here until the bars stop moving. Say: "Scan it once and leave it open. Every question I ask today will appear on your phone by itself." Read the room from the bars: if most say Never, slow down in the hands-on. Voting only runs from the presenter copy of this page: the top bar must say Voting open on this slide. If it shows a Start live vote button instead, press it and enter the PIN, or open the page from the presenter shortcut. If the bars stay empty, carry on: every later slide still works without votes.</p>
 </section>
 
 <!-- ============ PART 1 ============ -->
@@ -554,12 +554,12 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="clinic quiz" data-quiz="colour"></div>
     <div class="side">
       <p class="lede">Three bar charts, identical numbers. Vote on your phone, or click one on your screen.</p>
-      <button class="btn red qthink" type="button">Three seconds to decide</button>
+      <button class="btn red qthink" type="button">Ten seconds to decide</button>
       <button class="btn ghost qreveal" type="button">Show the verdicts</button>
       <span class="muted small qnote"></span>
     </div>
   </div>
-  <p class="notes">One minute. Press "Three seconds to decide" and say your own pick while it counts. The point: colour is not decoration. A is what Power BI gives you when the driver goes in the legend; C is one conditional-formatting rule, which they build in lap 4.</p>
+  <p class="notes">One minute. Press "Ten seconds to decide" and say your own pick while it counts. The point: colour is not decoration. A is what Power BI gives you when the driver goes in the legend; C is one conditional-formatting rule, which they build in lap 4.</p>
 </section>
 
 <section class="slide" data-title="Words are part of the design">
@@ -583,7 +583,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="clinic quiz c4" data-quiz="title"></div>
     <div class="side">
       <p class="lede">The chart never changes. Vote on your phone, or click one on your screen.</p>
-      <button class="btn red qthink" type="button">Three seconds to decide</button>
+      <button class="btn red qthink" type="button">Ten seconds to decide</button>
       <button class="btn ghost qreveal" type="button">Show the verdicts</button>
       <span class="muted small qnote"></span>
     </div>
@@ -633,13 +633,13 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="clinic" id="clinic"></div>
     <div class="side">
       <p class="lede">Six charts, identical numbers. Vote on your phone, or click one on your screen.</p>
-      <button class="btn red" id="think" type="button">Three seconds to decide</button>
+      <button class="btn red" id="think" type="button">Ten seconds to decide</button>
       <button class="btn ghost" id="reveal" type="button">Show the verdicts</button>
       <button class="btn ghost" id="voteNext" type="button">Next question</button>
       <span class="muted small qnote" id="voteNote"></span>
     </div>
   </div>
-  <p class="notes">Press "Three seconds to decide": the countdown fills the silence and then reveals the answers by itself. The six options are on their phones for each question, and the slide says when votes are in; the split appears on the charts, as percentages, with the verdicts. Say your own pick while it runs: "I would go A." Then press "Next question": there are three, and the best chart is different each time (bar, then line, then table). That is the lesson: the question picks the chart. The first one is also the Chart Clinic tab in Finished.pbix.</p>
+  <p class="notes">Press "Ten seconds to decide": the countdown fills the silence and then reveals the answers by itself. The six options are on their phones for each question, and the slide says when votes are in; the split appears on the charts, as percentages, with the verdicts. Say your own pick while it runs: "I would go A." Then press "Next question": there are three, and the best chart is different each time (bar, then line, then table). That is the lesson: the question picks the chart. The first one is also the Chart Clinic tab in Finished.pbix.</p>
 </section>
 
 <section class="slide dark" data-title="Vote: spot the trap" data-poll="trap">
@@ -649,7 +649,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="quizrow"><div class="stem"></div><div class="clinic quiz c1" data-quiz="trap"></div></div>
     <div class="side">
       <p class="lede">One chart, four explanations. Vote on your phone, or click one on your screen.</p>
-      <button class="btn red qthink" type="button">Three seconds to decide</button>
+      <button class="btn red qthink" type="button">Ten seconds to decide</button>
       <button class="btn ghost qreveal" type="button">Show the verdicts</button>
       <span class="muted small qnote"></span>
     </div>
@@ -1303,9 +1303,9 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   drawRound();
   $('#voteNext').onclick = () => { round = (round + 1) % rounds.length; drawRound(); ppSync(); };
   $('#reveal').onclick = () => setReveal(!clinic.classList.contains('revealed'));
-  $('#think').onclick = e => { const b = e.currentTarget; let n = 3; setReveal(false); b.disabled = true; b.textContent = n + ' ...';
+  $('#think').onclick = e => { const b = e.currentTarget; let n = 10; setReveal(false); b.disabled = true; b.textContent = n + ' ...';
     const t = setInterval(() => { n -= 1; if (n > 0) { b.textContent = n + ' ...'; return; }
-      clearInterval(t); b.disabled = false; b.textContent = 'Three seconds to decide'; setReveal(true); }, 1000); };
+      clearInterval(t); b.disabled = false; b.textContent = 'Ten seconds to decide'; setReveal(true); }, 1000); };
 
   /* ---- cut-off axis ---- */
   chips($('#axisChips'), ['Axis starts at 80%', 'Axis starts at 0%'], i => {
@@ -1400,9 +1400,9 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
       box.appendChild(b);
     });
     rv.onclick = () => show(!box.classList.contains('revealed'));
-    th.onclick = () => { let n = 3; show(false); th.disabled = true; th.textContent = n + ' ...';
+    th.onclick = () => { let n = 10; show(false); th.disabled = true; th.textContent = n + ' ...';
       const tick = setInterval(() => { n -= 1; if (n > 0) { th.textContent = n + ' ...'; return; }
-        clearInterval(tick); th.disabled = false; th.textContent = 'Three seconds to decide'; show(true); }, 1000); };
+        clearInterval(tick); th.disabled = false; th.textContent = 'Ten seconds to decide'; show(true); }, 1000); };
   });
 
   /* ---- live voting: only the presenter's copy drives it; every other copy of this page is unchanged ---- */
@@ -1411,7 +1411,6 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     if (!V) return;
     const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
       set: (k, v) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) { /* carry on */ } } };
-    const invited = new URLSearchParams(location.search).has('host');
     const tallies = {}, total = t => Object.values(t || {}).reduce((a, b) => a + b, 0);
     let pin = store.get('pp-host-pin'), active, wantTimer = 0, loop = 0, online = true, chain = Promise.resolve();
 
@@ -1475,7 +1474,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     function setHost() {
       const on = !!pin;
       document.body.classList.toggle('host', on);
-      btn.hidden = on || !invited;
+      btn.hidden = on;
       stat.hidden = clear.hidden = !on;
       if (on) paint();
     }
@@ -1499,13 +1498,22 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
         paint();
       }, 450);
     }
-    btn.onclick = async () => {
-      const typed = (prompt('Presenter PIN for live voting') || '').trim();
-      if (!typed) return;
+    async function signIn(typed) {
       const r = await V.host(typed, 'check');
       if (r && r.ok) { pin = typed; store.set('pp-host-pin', typed); setHost(); want(); }
       else alert(r ? 'That PIN is not right.' : 'The voting service could not be reached.');
+    }
+    btn.onclick = () => {
+      const typed = (prompt('Presenter PIN for live voting.\n\nOnly this copy of the slides sends questions to the phones. Students do not need a PIN.') || '').trim();
+      if (typed) signIn(typed);
     };
+    // The presenter shortcut opens this page with the PIN after the # sign. It is never sent to a server,
+    // and it is taken out of the address bar straight away so it cannot be read off the projector.
+    const link = /[#&]host=([^&]+)/.exec(location.hash);
+    if (link) {
+      history.replaceState(null, '', location.pathname + location.search);
+      signIn(decodeURIComponent(link[1]));
+    }
     clear.onclick = async () => {
       if (!confirm('Clear every vote from every question?')) return;
       const r = await V.host(pin, 'reset');
