@@ -1,6 +1,6 @@
 # Pole Position
 
-Turn a plain Power BI report into a dashboard that tells a story. A 90-minute hands-on session by **Ribesh Maharjan**, using 76 seasons of Formula 1 data.
+Turn a plain Power BI report into a designed, interactive dashboard. A 90-minute hands-on session by **Ribesh Maharjan**, using 76 seasons of Formula 1 data.
 
 **[Open the lecture](https://ribesh19.github.io/f1/)** · **[Open the workbook](https://ribesh19.github.io/f1/workbook.html)** · **[Download everything (zip)](https://github.com/Ribesh19/f1/archive/refs/heads/main.zip)**
 

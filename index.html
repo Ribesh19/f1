@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pole Position: dashboards that tell a story</title>
+<title>Pole Position: dashboard design in Power BI</title>
 <style>
 :root{--ink:#15151a;--paper:#f4f1ea;--card:#fff;--red:#e10600;--muted:#6b675e;--line:#dcd7cb;--grey:#b9b4a7;
   --serif:Georgia,"Times New Roman",serif;--sans:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;--mono:Consolas,"Courier New",monospace;--data:Bahnschrift,"DIN Alternate","Segoe UI",sans-serif}
@@ -19,6 +19,7 @@ p{margin:0;max-width:62ch}
 button{font:inherit;cursor:pointer}
 img{max-width:100%;display:block}
 .kicker{font-family:var(--data);font-stretch:87%;font-size:19px;font-weight:600;line-height:1.2;color:var(--red)}
+.two .kicker{margin-bottom:10px}
 .lede{font-size:clamp(17px,1.5vw,22px);color:var(--muted)}
 .slide{min-height:100vh;scroll-snap-align:start;padding:84px clamp(20px,6vw,96px) 56px clamp(20px,6vw,96px);display:flex;flex-direction:column;justify-content:center;gap:22px;position:relative}
 .slide.dark{background:var(--ink);color:#fff}
@@ -114,9 +115,9 @@ body.show-notes .notes{display:block}
 
 /* agenda */
 .agenda{display:grid;gap:0;max-width:980px}
-.agenda a{display:grid;grid-template-columns:64px 1fr auto;gap:18px;align-items:baseline;padding:clamp(8px,1.4vh,14px) 0;border-top:1px solid var(--line);color:inherit;text-decoration:none}
+.agenda a{display:grid;grid-template-columns:64px 1fr auto;gap:18px;align-items:baseline;padding:clamp(5px,.95vh,11px) 0;border-top:1px solid var(--line);color:inherit;text-decoration:none}
 .agenda a:last-child{border-bottom:1px solid var(--line)}
-.agenda .n{font-family:var(--data);font-stretch:75%;font-weight:700;font-size:44px;line-height:1;color:var(--red)}
+.agenda .n{font-family:var(--data);font-stretch:75%;font-weight:700;font-size:38px;line-height:1;color:var(--red)}
 .agenda b{font-size:21px;font-family:var(--serif)}
 .agenda span{display:block;color:var(--muted);font-size:15px}
 .agenda .t{font-family:var(--data);font-size:19px;font-variant-numeric:tabular-nums;color:var(--muted)}
@@ -298,6 +299,15 @@ body.host .nohost{display:none}
 .fv.lead{background:var(--red);color:#fff}
 #voteStat{font-size:13px;color:#b9b4a7;cursor:pointer}
 #voteStat.bad{color:#ff8a80}
+.chooser{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px}
+@media (max-width:900px){.chooser{grid-template-columns:1fr}}
+.job{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;background:var(--card);border-radius:10px;padding:13px 16px}
+.job .icon{color:var(--red);margin-top:3px}
+.job b{display:block;font-family:var(--serif);font-size:19px;line-height:1.15}
+.job span{display:block;font-size:16px;margin-top:3px}
+.job em{display:block;font-style:normal;font-size:14.5px;color:var(--muted)}
+.source a{color:inherit;font-weight:600;text-decoration-color:var(--red);text-underline-offset:3px}
+.check+.lede{margin-top:-4px}
 .feature{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start}
 .feature b{display:block}
 .feature span{color:var(--muted);font-size:16px}
@@ -333,13 +343,12 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 
 <main>
 
-<!-- ============ OPENING ============ -->
 <section class="slide" id="hero" data-title="Welcome">
   <div class="grid">
     <div style="display:grid;gap:18px">
       <img class="uni" src="assets/bcu-charcoal.png" alt="Birmingham City University">
       <h1>Dashboard design in Power BI.</h1>
-      <p class="lede">How to choose the right visual, lay out a page and tell a story with data. Then you redesign a plain report yourself.</p>
+      <p class="lede">Know your audience. Choose the right visual. Design the page. Make it interactive. Then you do all four on a plain report.</p>
       <div class="meta">
         <div><b>With</b>Ribesh Maharjan</div>
       </div>
@@ -368,7 +377,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 
 <section class="slide" data-title="Today">
   <p class="kicker">The plan</p>
-  <h2>What we will cover.</h2>
+  <h2>Four skills, then you use them.</h2>
   <div class="agenda" id="agenda"></div>
   <p class="notes">Half talking, half doing. Tell them the workshop starts at about minute 45, so the download matters.</p>
 </section>
@@ -418,36 +427,18 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   <p class="notes">Wait here until the bars stop moving. Say: "Scan it once and leave it open. Every question I ask today will appear on your phone by itself." Read the room from the bars: if most say Never, slow down in the hands-on. Voting only runs from the presenter copy of this page: the top bar must say Voting open on this slide. If it shows a Start live vote button instead, press it and enter the PIN, or open the page from the presenter shortcut. If the bars stay empty, carry on: every later slide still works without votes.</p>
 </section>
 
-<!-- ============ PART 1 ============ -->
-<section class="slide part" data-part="1" data-title="Part 1: Why design matters">
+<section class="slide part" data-part="1" data-title="Part 1: Know your audience">
   <div class="txt">
     <div class="num">1</div>
-    <h2>Why design matters</h2>
-    <p class="lede">The same numbers can be ignored or acted on. The difference is design.</p>
-    <p class="time">About 10 minutes</p>
+    <h2>Know your audience</h2>
+    <p class="lede">A report is for someone, and they give it about ten seconds. After this part you can say who a report is for and what they need from it.</p>
+    <p class="time">About 8 minutes</p>
   </div>
   <img src="assets/starter.jpg" alt="A plain Power BI report">
 </section>
 
-<section class="slide" data-title="Quick guess" id="guess" data-poll="guess">
-  <p class="kicker">Quick guess</p>
-  <h2>In the 1980s, how many F1 cars that started a race finished it?</h2>
-  <div class="two">
-    <div style="display:grid;gap:14px">
-      <p class="lede">Send your guess from your phone. The number below is the room's average.</p>
-      <p class="muted small" id="guessWho" style="margin-bottom:-8px">Your guess</p>
-      <output id="guessOut" for="guessIn" style="font-family:var(--serif);font-size:72px;line-height:1">70%</output>
-      <input type="range" id="guessIn" min="0" max="100" value="70" aria-label="Your guess, as a percentage">
-      <div class="row"><button class="btn red" id="guessGo" type="button">Lock it in</button><button class="btn ghost" id="guessNow" type="button" hidden>And today?</button></div>
-    </div>
-    <div class="demo" id="guessDemo" aria-live="polite"></div>
-  </div>
-  <div class="live h" data-live="guess"></div>
-  <p class="notes">Each phone has a slider. As guesses arrive the big number becomes the room's average and moves by itself: read it out ("the room says 62"). Then lock it in: the room's guess is drawn against the real 48%, and the strip underneath shows how the guesses were spread, with the right band in red. With no votes the slider is yours to drag, as before. Then press "And today?".</p>
-</section>
-
 <section class="slide" data-title="Same data, two reports">
-  <p class="kicker">Look first</p>
+  <p class="kicker">Know your audience: the first look</p>
   <h2>Same data. Same measures. Which one would you trust?</h2>
   <div class="compare at-before" id="compare">
     <img src="assets/starter.jpg" alt="Plain Power BI report with default colours, a table, a pie chart and a donut chart">
@@ -460,7 +451,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 </section>
 
 <section class="slide dark" data-title="The ten-second test" data-poll-dyn="find">
-  <p class="kicker">Try it</p>
+  <p class="kicker">Know your audience: the ten seconds they give you</p>
   <h2>You get ten seconds.</h2>
   <p class="lede">Find the answer to one question: <b>how many F1 cars finish the race today?</b> Pick it on your phone.</p>
   <div class="flashrow">
@@ -480,48 +471,120 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   <p class="notes">Read the question out first so they know what to look for. They saw 88% two slides ago, and still will not find it on the plain report: that is the point. Run the plain one first, then the designed one: the slide gives the answer each time, so nobody has to speak. Each button puts the same five answers on the phones (48%, 55%, 64%, 88%, could not find it). The two bars beside the buttons show how many picked the right one, 88%, from each report: show the plain one, let them answer, then the designed one, and compare. The gap between the bars is the argument for design.</p>
 </section>
 
-<section class="slide dark" data-title="What is data storytelling?" id="trio">
-  <p class="kicker">The idea</p>
-  <h2>A data story needs three things.</h2>
-  <div class="two">
-    <svg viewBox="0 0 520 430" role="group" aria-label="Three overlapping circles: data, visuals and narrative">
-      <circle class="ring" data-k="data" cx="260" cy="150" r="120" tabindex="0" role="button" aria-label="Data"/>
-      <circle class="ring" data-k="visuals" cx="180" cy="280" r="120" tabindex="0" role="button" aria-label="Visuals"/>
-      <circle class="ring" data-k="narrative" cx="340" cy="280" r="120" tabindex="0" role="button" aria-label="Narrative"/>
-      <text x="260" y="95" text-anchor="middle">Data</text>
-      <text x="120" y="330" text-anchor="middle">Visuals</text>
-      <text x="400" y="330" text-anchor="middle">Narrative</text>
-    </svg>
-    <div>
-      <div class="row" id="trioChips" role="group" aria-label="Combine the elements"></div>
-      <div id="trioText" aria-live="polite" style="margin-top:18px"></div>
-      <p class="source" style="margin-top:14px">Model: Brent Dykes, <i>Effective Data Storytelling</i>.</p>
-    </div>
-  </div>
-  <p class="notes">You click, you narrate. Line to use: "Data plus visuals is the plain report you just saw: correct, and nobody cares." Narrative means a headline, an order, and a reason to care.</p>
-</section>
-
-<!-- ============ PART 2 ============ -->
-<section class="slide part" data-part="2" data-title="Part 2: Dashboard design">
-  <div class="txt">
-    <div class="num">2</div>
-    <h2>Dashboard design</h2>
-    <p class="lede">Audience, layout, clutter, colour and words. Five decisions before you add a single chart.</p>
-    <p class="time">About 18 minutes</p>
-  </div>
-  <img src="assets/finished-story.jpg" alt="A designed Power BI report page">
-</section>
-
 <section class="slide" data-title="Start with the audience">
-  <p class="kicker">Decision 1 · Audience</p>
+  <p class="kicker">Know your audience: who is it for</p>
   <h2>Who is it for, and what will they do with it?</h2>
   <div class="row" id="audChips" role="group" aria-label="Choose an audience"></div>
   <div class="card" id="audOut" aria-live="polite"></div>
   <p class="notes">Click through all four without stopping to ask. Line: "Same data, four different pages, because four different people are looking." Each example is a page in Gallery.pbix.</p>
 </section>
 
+<section class="slide" data-title="In the real world">
+  <p class="kicker">Know your audience: at work</p>
+  <h2>What happens to a dashboard at work.</h2>
+  <div class="cols">
+    <div class="card"><h3>It gets ten seconds</h3><p class="small" style="margin-top:8px">Most reports are opened on the way to something else. If the finding is not in the title, it is not found.</p></div>
+    <div class="card"><h3>It gets questioned</h3><p class="small" style="margin-top:8px">"Where is that number from?" Keep definitions and sources one click away. Trust is a design feature.</p></div>
+    <div class="card"><h3>It gets reused</h3><p class="small" style="margin-top:8px">A theme and a background become a template. The second report takes a fraction of the time.</p></div>
+    <div class="card"><h3>It gets judged on looks</h3><p class="small" style="margin-top:8px">Fair or not, a careful-looking report is assumed to have careful numbers. Use that.</p></div>
+  </div>
+  <p class="notes">Three minutes. One short story of your own per card. No questions to the room.</p>
+</section>
+
+<section class="slide part" data-part="2" data-title="Part 2: Choose the right visual">
+  <div class="txt">
+    <div class="num">2</div>
+    <h2>Choose the right visual</h2>
+    <p class="lede">You know the chart types. After this part you can pick one on purpose, and spot one that misleads.</p>
+    <p class="time">About 14 minutes</p>
+  </div>
+  <img src="assets/lap-2.jpg" alt="A Power BI page with a line chart and column charts">
+</section>
+
+<section class="slide" data-title="Start from the question">
+  <p class="kicker">Choose the right visual: a rule of thumb</p>
+  <h2>Ask what you want to show. The chart follows.</h2>
+  <div class="row" id="intents" role="group" aria-label="What do you want to show?"></div>
+  <div class="card" id="advice" aria-live="polite"></div>
+  <p class="notes">Go through all six quickly. The order of the decision is the lesson: question first, chart second. Most bad charts come from picking the chart first.</p>
+</section>
+
+<section class="slide adv" data-title="A map of visuals">
+  <p class="kicker">Choose the right visual: a map</p>
+  <h2>Nine jobs a visual can do.</h2>
+  <div class="chooser">
+    <div class="job"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h13M4 12h8M4 18h16"/></svg><div><b>Compare sizes</b><span>Bar or column chart.</span><em>More than ten bars? Show the top ones.</em></div></div>
+    <div class="job"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l5-6 4 3 4-7 5 4"/></svg><div><b>Show change over time</b><span>Line chart. Columns for a few periods.</span><em>Never sort time by size.</em></div></div>
+    <div class="job"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h11M4 18h6"/></svg><div><b>Rank</b><span>Bar chart sorted by value.</span><em>A table when the exact number matters.</em></div></div>
+    <div class="job"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM10 5v14M10 12h10"/></svg><div><b>Show parts of a whole</b><span>Stacked bar or treemap.</span><em>Pie or donut only for two or three parts.</em></div></div>
+    <div class="job"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V13M9 19V7M14 19V4M19 19v-8"/></svg><div><b>Show the spread</b><span>Columns of ranges, or a box plot.</span><em>An average on its own hides the shape.</em></div></div>
+    <div class="job"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h.01M10 13h.01M13 15h.01M16 9h.01M19 6h.01"/></svg><div><b>Relate two measures</b><span>Scatter chart. Size adds a third.</span><em>A pattern is not proof of a cause.</em></div></div>
+    <div class="job"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10M7 12h6M4 4h16v16H4z"/></svg><div><b>Show one number</b><span>Card or KPI.</span><em>Always beside a target or a comparison.</em></div></div>
+    <div class="job"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z"/></svg><div><b>Show where</b><span>Map or filled map.</span><em>Only when place matters. Otherwise a sorted bar.</em></div></div>
+    <div class="job"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h5v5h5v5h6"/></svg><div><b>Show a flow</b><span>Waterfall, funnel or decomposition tree.</span><em>For how a total builds up or drops off.</em></div></div>
+  </div>
+  <p class="source">The nine jobs follow <a href="https://www.sqlbi.com/ref/power-bi-visuals-reference/">The Visuals Reference for Power BI</a> by SQLBI and OKViz, which sorts built-in and custom visuals this way and is worth keeping open. The picks on this slide are built-in visuals.</p>
+  <p class="notes">One minute. Do not read all nine. Say: "Name the job first, then the chart picks itself." Point at two: change over time, and parts of a whole, because those are the two people get wrong most. Open the SQLBI reference in a tab if there is time: it shows every visual, built-in and custom, sorted by the same jobs.</p>
+</section>
+
+<section class="slide" data-title="Vote: pick the chart" data-poll-dyn="chart">
+  <p class="kicker" id="voteStep">Choose the right visual: pick the chart</p>
+  <h2 id="voteQ">Who has won the most races?</h2>
+  <div class="vote">
+    <div class="clinic" id="clinic"></div>
+    <div class="side">
+      <p class="lede">Six charts, identical numbers. Vote on your phone, or click one on your screen.</p>
+      <button class="btn red" id="think" type="button">Ten seconds to decide</button>
+      <button class="btn ghost" id="reveal" type="button">Show the verdicts</button>
+      <button class="btn ghost" id="voteNext" type="button">Next question</button>
+      <span class="muted small qnote" id="voteNote"></span>
+    </div>
+  </div>
+  <p class="notes">Press "Ten seconds to decide": the countdown fills the silence and then reveals the answers by itself. The six options are on their phones for each question, and the slide says when votes are in; the split appears on the charts, as percentages, with the verdicts. Say your own pick while it runs: "I would go A." Then press "Next question": there are three, and the best chart is different each time (bar, then line, then table). That is the lesson: the question picks the chart. The first one is also the Chart Clinic tab in Finished.pbix.</p>
+</section>
+
+<section class="slide dark" data-title="Vote: spot the trap" data-poll="trap">
+  <p class="kicker">Choose the right visual: spot the trap</p>
+  <h2>The 2020s bar is nearly three times as tall. What is going on?</h2>
+  <div class="vote">
+    <div class="quizrow"><div class="stem"></div><div class="clinic quiz c1" data-quiz="trap"></div></div>
+    <div class="side">
+      <p class="lede">One chart, four explanations. Vote on your phone, or click one on your screen.</p>
+      <button class="btn red qthink" type="button">Ten seconds to decide</button>
+      <button class="btn ghost qreveal" type="button">Show the verdicts</button>
+      <span class="muted small qnote"></span>
+    </div>
+  </div>
+  <p class="notes">One minute. Let the votes come in before you reveal: some people will say it is fair, because the labels are honest. The labels are right and the picture still lies. This sets up the next slide, three ways a chart misleads.</p>
+</section>
+
+<section class="slide dark" data-title="Three traps">
+  <p class="kicker">Choose the right visual: watch for</p>
+  <h2>Three ways a chart misleads.</h2>
+  <div class="two">
+    <div style="display:grid;gap:16px">
+      <div class="trap"><b>The cut-off axis</b><span class="muted">Starting a bar chart above zero makes small gaps look huge.</span></div>
+      <div class="trap"><b>Too many slices</b><span class="muted">Past three or four, nobody can compare angles. Use bars.</span></div>
+      <div class="trap"><b>Two axes</b><span class="muted">Two scales on one chart let you draw any relationship you like.</span></div>
+      <div class="row" id="axisChips" role="group" aria-label="Axis start"></div>
+    </div>
+    <div class="demo" id="axisDemo" aria-live="polite"></div>
+  </div>
+  <p class="notes">Toggle the axis. Same two numbers: 83% and 88%. With the axis cut at 80 the 2020s look more than twice as reliable. Bars must start at zero; lines can sometimes start higher if you say so.</p>
+</section>
+
+<section class="slide part" data-part="3" data-title="Part 3: Design the page">
+  <div class="txt">
+    <div class="num">3</div>
+    <h2>Design the page</h2>
+    <p class="lede">Layout, clutter, colour and words, then a theme and a background. After this part you can take a plain page to a designed one.</p>
+    <p class="time">About 16 minutes</p>
+  </div>
+  <img src="assets/finished-story.jpg" alt="A designed Power BI report page">
+</section>
+
 <section class="slide dark" data-title="Layout and hierarchy">
-  <p class="kicker">Decision 2 · Layout</p>
+  <p class="kicker">Design the page: layout</p>
   <h2>Tell the eye where to go.</h2>
   <div class="two">
     <div>
@@ -540,7 +603,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 </section>
 
 <section class="slide" data-title="Remove the clutter">
-  <p class="kicker">Decision 3 · Clutter</p>
+  <p class="kicker">Design the page: clutter</p>
   <h2>Take things away until it is clear.</h2>
   <div class="two">
     <div>
@@ -557,7 +620,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 </section>
 
 <section class="slide dark" data-title="Colour with a purpose">
-  <p class="kicker">Decision 4 · Colour</p>
+  <p class="kicker">Design the page: colour</p>
   <h2>Colour is a signal, so use it once.</h2>
   <div class="two">
     <div>
@@ -575,7 +638,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 </section>
 
 <section class="slide dark" data-title="Vote: pick the colour" data-poll="colour">
-  <p class="kicker">Pick the colour</p>
+  <p class="kicker">Design the page: pick the colour</p>
   <h2>Who leads? Which version tells you fastest?</h2>
   <div class="vote">
     <div class="clinic quiz" data-quiz="colour"></div>
@@ -590,7 +653,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 </section>
 
 <section class="slide" data-title="Words are part of the design">
-  <p class="kicker">Decision 5 · Words</p>
+  <p class="kicker">Design the page: words</p>
   <h2>A title should say what you found.</h2>
   <div class="two">
     <div>
@@ -604,7 +667,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 </section>
 
 <section class="slide" data-title="Vote: pick the title" data-poll="title">
-  <p class="kicker">Pick the title</p>
+  <p class="kicker">Design the page: pick the title</p>
   <h2>Same chart, four titles. Which would you ship?</h2>
   <div class="vote">
     <div class="clinic quiz c4" data-quiz="title"></div>
@@ -618,117 +681,141 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   <p class="notes">One minute. A is Power BI's default, so expect votes for it: it looks normal because everyone has seen it a thousand times. C is long, and that is fine: a headline earns its length by saving the reader the work. D is worth defending: a question is honest when you have no finding yet.</p>
 </section>
 
+<section class="slide" data-title="Make your own background">
+  <p class="kicker">Design the page: theme and background</p>
+  <h2>The layout is just a picture.</h2>
+  <div class="two">
+    <div>
+      <p class="lede">Panels, rail, photo and icons are one image. Every number on top is still live Power BI.</p>
+      <div class="cols" style="margin-top:18px;grid-template-columns:1fr 1fr">
+        <div><h3>PowerPoint</h3><p class="muted small">Open <code>design/Backgrounds.pptx</code>. Move the shapes. Export the slide as PNG.</p></div>
+        <div><h3>Figma</h3><p class="muted small">Drag a <code>.svg</code> from <code>design/backgrounds</code> into Figma. Edit. Export as PNG.</p></div>
+      </div>
+      <div class="row" style="margin-top:18px">
+        <button class="btn" id="swapBtn" type="button" aria-pressed="false">Put the visuals on top</button>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <img src="design/backgrounds/main.png" alt="The background image on its own: a dark rail, a photo panel and empty white panels">
+      <img class="top" src="assets/finished-story.jpg" alt="The same layout with Power BI visuals placed in the panels">
+    </div>
+  </div>
+  <p class="notes">Open the PowerPoint file and drag one panel to show how little is involved. Slide size 13.333 by 7.5 inches equals 1280 by 720, the default Power BI page.</p>
+</section>
+
 <section class="slide dark" data-title="Seven checks">
-  <p class="kicker">Before you publish</p>
-  <h2>Seven checks for any dashboard.</h2>
+  <p class="kicker">Design the page: before you publish</p>
+  <h2>Seven checks before you publish.</h2>
   <ol class="check">
-    <li><label><input type="checkbox"> <span><b>One finding.</b> Can you say it in a sentence?</span></label></li>
-    <li><label><input type="checkbox"> <span><b>Ten seconds.</b> Does a stranger get it at a glance?</span></label></li>
-    <li><label><input type="checkbox"> <span><b>Reading order.</b> Biggest and top-left is the most important.</span></label></li>
-    <li><label><input type="checkbox"> <span><b>Nothing spare.</b> Every line, border and label earns its place.</span></label></li>
-    <li><label><input type="checkbox"> <span><b>One accent.</b> Colour points at the thing that matters.</span></label></li>
-    <li><label><input type="checkbox"> <span><b>Aligned.</b> Edges line up; gaps are equal.</span></label></li>
-    <li><label><input type="checkbox"> <span><b>Honest.</b> Axes start where they should; sources are one click away.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>A real question.</b> You can name who asks it and what they do with the answer.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>Three seconds.</b> The most important number is top-left, on one screen, with no scrolling.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>Something to compare to.</b> Every key number sits beside a target, last year or a trend.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>The right chart.</b> Bars to compare, a line for time, a table for exact values.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>Readable numbers.</b> 3.4M, not 3,400,000. The same scale and sort order across charts.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>One meaning per colour.</b> It means the same on every page. A theme keeps it that way.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>Nothing hidden.</b> Readers can see what is filtered, and detail is one step away.</span></label></li>
   </ol>
   <p class="lede" id="score" aria-live="polite">Tick them for your own report later. Score: 0 of 7.</p>
-  <p class="notes">Tick the boxes yourself for the finished report as you read them. The same list is on their screens to score their own work later. Nobody reports a score out loud.</p>
+  <p class="source">Drawn from Microsoft Learn, <a href="https://learn.microsoft.com/en-us/power-bi/create-reports/service-dashboards-design-tips">Tips for designing a great Power BI dashboard</a>; SQLBI, <a href="https://www.sqlbi.com/articles/introducing-the-3-30-300-rule-for-better-reports/">the 3-30-300 rule</a>; and Tabular Editor, <a href="https://tabulareditor.com/blog/data-visualization-best-practices-for-power-bi-reports">Data visualization best practices for Power BI reports</a>.</p>
+  <p class="notes">Two minutes. These are the checks a reviewer at work will run on your report, whether or not they say so. Tick the boxes for the finished report as you read them. Where they come from: Microsoft's own dashboard tips (audience, one screen, top-left, readable numbers, consistent colour); SQLBI's 3-30-300 rule (three seconds for the overview, thirty to filter, three hundred for the detail); Tabular Editor's best practices (start from the question, give every KPI a comparison, make filters visible). The same list is on their screens to score their own work later.</p>
 </section>
 
-<!-- ============ PART 3 ============ -->
-<section class="slide part" data-part="3" data-title="Part 3: Choosing the visual">
-  <div class="txt">
-    <div class="num">3</div>
-    <h2>Choosing the visual</h2>
-    <p class="lede">You know the chart types. This is about picking one on purpose.</p>
-    <p class="time">About 12 minutes</p>
-  </div>
-  <img src="assets/lap-2.jpg" alt="A Power BI page with a line chart and column charts">
-</section>
-
-<section class="slide" data-title="Start from the question">
-  <p class="kicker">A rule of thumb</p>
-  <h2>Ask what you want to show. The chart follows.</h2>
-  <div class="row" id="intents" role="group" aria-label="What do you want to show?"></div>
-  <div class="card" id="advice" aria-live="polite"></div>
-  <p class="notes">Go through all six quickly. The order of the decision is the lesson: question first, chart second. Most bad charts come from picking the chart first.</p>
-</section>
-
-<section class="slide" data-title="Vote: pick the chart" data-poll-dyn="chart">
-  <p class="kicker" id="voteStep">Pick the chart</p>
-  <h2 id="voteQ">Who has won the most races?</h2>
-  <div class="vote">
-    <div class="clinic" id="clinic"></div>
-    <div class="side">
-      <p class="lede">Six charts, identical numbers. Vote on your phone, or click one on your screen.</p>
-      <button class="btn red" id="think" type="button">Ten seconds to decide</button>
-      <button class="btn ghost" id="reveal" type="button">Show the verdicts</button>
-      <button class="btn ghost" id="voteNext" type="button">Next question</button>
-      <span class="muted small qnote" id="voteNote"></span>
-    </div>
-  </div>
-  <p class="notes">Press "Ten seconds to decide": the countdown fills the silence and then reveals the answers by itself. The six options are on their phones for each question, and the slide says when votes are in; the split appears on the charts, as percentages, with the verdicts. Say your own pick while it runs: "I would go A." Then press "Next question": there are three, and the best chart is different each time (bar, then line, then table). That is the lesson: the question picks the chart. The first one is also the Chart Clinic tab in Finished.pbix.</p>
-</section>
-
-<section class="slide dark" data-title="Vote: spot the trap" data-poll="trap">
-  <p class="kicker">Spot the trap</p>
-  <h2>The 2020s bar is nearly three times as tall. What is going on?</h2>
-  <div class="vote">
-    <div class="quizrow"><div class="stem"></div><div class="clinic quiz c1" data-quiz="trap"></div></div>
-    <div class="side">
-      <p class="lede">One chart, four explanations. Vote on your phone, or click one on your screen.</p>
-      <button class="btn red qthink" type="button">Ten seconds to decide</button>
-      <button class="btn ghost qreveal" type="button">Show the verdicts</button>
-      <span class="muted small qnote"></span>
-    </div>
-  </div>
-  <p class="notes">One minute. Let the votes come in before you reveal: some people will say it is fair, because the labels are honest. The labels are right and the picture still lies. This sets up the next slide, three ways a chart misleads.</p>
-</section>
-
-<section class="slide dark" data-title="Three traps">
-  <p class="kicker">Watch for</p>
-  <h2>Three ways a chart misleads.</h2>
-  <div class="two">
-    <div style="display:grid;gap:16px">
-      <div class="trap"><b>The cut-off axis</b><span class="muted">Starting a bar chart above zero makes small gaps look huge.</span></div>
-      <div class="trap"><b>Too many slices</b><span class="muted">Past three or four, nobody can compare angles. Use bars.</span></div>
-      <div class="trap"><b>Two axes</b><span class="muted">Two scales on one chart let you draw any relationship you like.</span></div>
-      <div class="row" id="axisChips" role="group" aria-label="Axis start"></div>
-    </div>
-    <div class="demo" id="axisDemo" aria-live="polite"></div>
-  </div>
-  <p class="notes">Toggle the axis. Same two numbers: 83% and 88%. With the axis cut at 80 the 2020s look more than twice as reliable. Bars must start at zero; lines can sometimes start higher if you say so.</p>
-</section>
-
-<!-- ============ PART 4 ============ -->
-<section class="slide part" data-part="4" data-title="Part 4: Dashboards I have designed">
+<section class="slide part" data-part="4" data-title="Part 4: Make it interactive">
   <div class="txt">
     <div class="num">4</div>
+    <h2>Make it interactive</h2>
+    <p class="lede">Drill-through, bookmarks and tooltips put detail one step away and make a report feel like an app. After this part you know what each one is for.</p>
+    <p class="time">About 6 minutes</p>
+  </div>
+  <img src="assets/finished-profile.jpg" alt="A drill-through page about one driver">
+</section>
+
+<section class="slide adv" data-title="Three ways to add depth">
+  <p class="kicker">Make it interactive: why</p>
+  <h2>Three ways to keep detail off the page.</h2>
+  <div class="cols">
+    <div class="card"><p class="when">Drill-through</p><h3>A whole page about one thing</h3><p>Right-click a driver, a customer or a product and open a page filtered to it.</p><p class="muted small" style="margin-top:8px">Today: the Driver profile page, in the extra laps.</p></div>
+    <div class="card"><p class="when">Bookmark</p><h3>Another state of the same page</h3><p>A saved view that a button brings back: a panel that opens, a second chart, a reset.</p><p class="muted small" style="margin-top:8px">Today: the How to read this button, in the extra laps.</p></div>
+    <div class="card"><p class="when">Report page tooltip</p><h3>More about one mark</h3><p>A small page that appears on hover, filtered to whatever is under the mouse.</p><p class="muted small" style="margin-top:8px">Today: hover a driver to see their seasons, in lap 5.</p></div>
+  </div>
+  <p class="rule"><b>Why bother.</b> "Can you also show..." no longer means one more chart. It goes one step away, where only the people who want it look.</p>
+  <p class="notes">One minute. Tie it back to Remove the clutter: these three are how you say yes to a request without adding to the page. The next three slides take one each.</p>
+</section>
+
+<section class="slide dark adv" data-title="Drill-through">
+  <div class="two">
+    <div>
+      <p class="kicker">Make it interactive: drill-through</p>
+      <h2>Right-click to a page about one thing.</h2>
+      <div class="cols" style="grid-template-columns:1fr;gap:12px;margin-top:16px">
+        <div class="fact"><b>A page waiting for a filter</b><span class="muted">Put a field in the page's drill-through well and it becomes a destination for that field.</span></div>
+        <div class="fact"><b>The reader chooses</b><span class="muted">Right-click any mark that carries the field, on any page, then Drill through.</span></div>
+        <div class="fact"><b>Everything arrives filtered</b><span class="muted">The page opens for that one driver. Charts, cards and titles all follow.</span></div>
+        <div class="fact"><b>A way back</b><span class="muted">Power BI adds a Back button. Keep it, or style your own.</span></div>
+      </div>
+    </div>
+    <img class="shot" src="assets/finished-profile.jpg" alt="The Driver profile page for Lewis Hamilton, reached by drill-through">
+  </div>
+  <p class="notes">One minute. In the finished file, right-click Hamilton on the Drivers page, Drill through, Driver profile, then Back. Say: "One page, built once, works for all 791 drivers." At work this is how a summary page stays a summary.</p>
+</section>
+
+<section class="slide adv" data-title="Bookmarks">
+  <p class="kicker">Make it interactive: bookmarks</p>
+  <h2>Bookmarks make a report feel like an app.</h2>
+  <div class="cols">
+    <div class="card"><p class="when">What it is</p><h3>A saved state of a page</h3><p>Filters, slicers, sort order and which objects are showing. Not the numbers: after a refresh it shows the new data.</p></div>
+    <div class="card"><p class="when">What you build with it</p><h3>Buttons that change the page</h3><p>Open and close a help panel. Swap one chart for another. Reset every filter. Move between pages like a menu.</p></div>
+    <div class="card"><p class="when">The one setting to know</p><h3>Untick Data to keep the reader's filters</h3><p>With Data ticked, a bookmark replaces whatever the reader picked. Unticked, only what is visible changes.</p></div>
+  </div>
+  <p class="rule"><b>After you edit a page,</b> bookmarks do not update themselves: choose Update on each one. Try them as a reader with Ctrl and click.</p>
+  <p class="notes">Ninety seconds, and the only bookmark slide. In the finished file press How to read this, then Close. The setting to dwell on is Data: almost everyone meets it as a bug ("my help button resets everything"). The steps are extra lap 7 in the workbook.</p>
+</section>
+
+<section class="slide dark adv" data-title="How a tooltip page works">
+  <div class="two">
+    <div>
+      <p class="kicker">Make it interactive: tooltips</p>
+      <h2>Hovering sends a filter.</h2>
+      <div class="cols" style="grid-template-columns:1fr;gap:12px;margin-top:16px">
+        <div class="fact"><b>It is an ordinary page</b><span class="muted">Small, usually hidden, with Allow use as tooltip switched on. Anything a page can hold, it can hold.</span></div>
+        <div class="fact"><b>The mark becomes the filter</b><span class="muted">Hover Lewis Hamilton and the page is filtered to him. Charts, cards and title measures all recalculate.</span></div>
+        <div class="fact"><b>Automatic or by hand</b><span class="muted">Put a field in Tooltip fields and every visual using that field shows it. Or choose the page on one visual.</span></div>
+        <div class="fact"><b>Know the limits</b><span class="muted">Readers cannot click or scroll inside a tooltip. One idea, one small page.</span></div>
+      </div>
+    </div>
+    <img class="shot" style="aspect-ratio:4/3;max-width:460px;justify-self:center" src="assets/lap-5-tooltip.jpg" alt="A tooltip page filtered to Lewis Hamilton: 105 wins from 380 starts, one column per season, red in title years">
+  </div>
+  <p class="notes">One minute. Hover Hamilton in the finished file while this is up. The point to land: nobody wrote "show Hamilton" anywhere. The hover passed the driver in as a filter and the measures did the rest. Sizes Power BI offers: 320 by 240, 400 by 300, 600 by 450.</p>
+</section>
+
+<section class="slide part" data-part="5" data-title="Part 5: Dashboards I have designed">
+  <div class="txt">
+    <div class="num">5</div>
     <h2>Dashboards I have designed</h2>
     <p class="lede">Real examples, and what each one taught me.</p>
-    <p class="time">About 10 minutes</p>
+    <p class="time">About 6 minutes</p>
   </div>
   <img src="assets/gallery-1-editorial.jpg" alt="An editorial style Power BI dashboard">
 </section>
 
 <section class="slide" data-title="From my own work" id="workSlide">
-  <p class="kicker">From my own work</p>
+  <p class="kicker">My dashboards: what I built</p>
   <h2>What I built, and what I learned.</h2>
   <div class="gallery" id="work"></div>
   <p class="lede" id="workEmpty">I will show these live.</p>
   <p class="notes">Your screenshots appear here when you add them to assets/my-work as 01.jpg to 06.jpg. For each: who it was for, the one decision that mattered, what you would change now. If the folder is empty, switch to Power BI and show the reports directly.</p>
 </section>
 
-<section class="slide dark" data-title="One story, five looks">
-  <p class="kicker">Designed for today</p>
-  <h2>One story. Five looks.</h2>
+<section class="slide dark" data-title="One report, five looks">
+  <p class="kicker">My dashboards: one report, five looks</p>
+  <h2>One report. Five looks.</h2>
   <div class="gallery" id="gallery"></div>
   <p class="notes">All five are on screen together, so compare by pointing, not clicking. Say who each is for: Poster for an executive, Timing Sheet for an analyst, Night Race for a wall screen. Click one only if you want it full size.</p>
 </section>
 
-<!-- ============ PART 5 ============ -->
-<section class="slide part" data-part="5" data-title="Part 5: Your turn">
+<section class="slide part" data-part="6" data-title="Part 6: Your turn">
   <div class="txt">
-    <div class="num">5</div>
+    <div class="num">6</div>
     <h2>Your turn</h2>
     <p class="lede">Two things open: <code>powerbi/Starter.pbix</code> to work in, and <a href="workbook.html" style="color:inherit"><code>workbook.html</code></a> for the clicks. This screen shows the goal and the clock.</p>
     <p class="small" style="margin-top:10px;color:#b9b4a7">No files yet? Go to <span style="font-family:var(--mono)">ribesh19.github.io/f1</span>, download the zip and unzip it.</p>
@@ -838,99 +925,6 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   <p class="notes">Show the finished file for thirty seconds: right-click Hamilton, drill through, Back. Then the How to read this button. Do not build them live.</p>
 </section>
 
-<section class="slide dark adv" data-title="Tooltips and bookmarks: why">
-  <p class="kicker">Going further · What you just built</p>
-  <h2>Two ways to keep detail off the page.</h2>
-  <div class="cols">
-    <div class="card"><p class="when">Report page tooltip</p><h3>More about one mark</h3><p>A small page that appears on hover, filtered to whatever is under the mouse.</p><p class="muted small" style="margin-top:8px">Today: hover a driver, see their wins season by season.</p></div>
-    <div class="card"><p class="when">Bookmark</p><h3>Another state of the same page</h3><p>A saved view that a button brings back: a note that opens, a second chart, a reset.</p><p class="muted small" style="margin-top:8px">Today: the How to read this button in the extra laps.</p></div>
-    <div class="card"><p class="when">Why bother</p><h3>The page stays readable</h3><p>"Can you also show..." no longer means one more chart. It goes one step away, where only the people who want it look.</p></div>
-  </div>
-  <p class="rule"><b>Rule of thumb.</b> One mark, more detail: tooltip. Same page, different view: bookmark. A whole page about one thing: drill-through.</p>
-  <p class="notes">One minute. Tie it back to Part 2, Remove the clutter: these two features are how you say yes to a request without adding to the page. If time is short, show this slide and the Data tick slide, and skip the other three.</p>
-</section>
-
-<section class="slide adv" data-title="How a tooltip page works">
-  <div class="two">
-    <div>
-      <p class="kicker">Report page tooltips</p>
-      <h2>Hovering sends a filter.</h2>
-      <div class="cols" style="grid-template-columns:1fr;gap:12px;margin-top:16px">
-        <div class="fact"><b>It is an ordinary page</b><span class="muted">Small, usually hidden, with Allow use as tooltip switched on. Anything a page can hold, it can hold.</span></div>
-        <div class="fact"><b>The mark becomes the filter</b><span class="muted">Hover Lewis Hamilton and the page is filtered to him. Charts, cards and title measures all recalculate.</span></div>
-        <div class="fact"><b>Automatic or by hand</b><span class="muted">Put a field in Tooltip fields and every visual using that field shows it. Or choose the page on one visual.</span></div>
-        <div class="fact"><b>Know the limits</b><span class="muted">Readers cannot click or scroll inside a tooltip. One idea, one small page.</span></div>
-      </div>
-    </div>
-    <img class="shot" style="aspect-ratio:4/3;max-width:460px;justify-self:center" src="assets/lap-5-tooltip.jpg" alt="A tooltip page filtered to Lewis Hamilton: 105 wins from 380 starts, one column per season, red in title years">
-  </div>
-  <p class="notes">One minute. Hover Hamilton in the finished file while this is up. The point to land: nobody wrote "show Hamilton" anywhere. The hover passed the driver in as a filter and the measures did the rest. Sizes Power BI offers: 320 by 240, 400 by 300, 600 by 450.</p>
-</section>
-
-<section class="slide dark adv" data-title="What a bookmark remembers">
-  <p class="kicker">Bookmarks</p>
-  <h2>What a bookmark remembers.</h2>
-  <div class="cols">
-    <div class="card"><p class="when">Data</p><h3>What is filtered</h3><ul><li>Filters</li><li>Slicers: their type and what is picked</li><li>Cross-highlighting</li><li>Sort order</li><li>Drill location</li></ul></div>
-    <div class="card"><p class="when">Display</p><h3>What is showing</h3><ul><li>Which objects are visible or hidden</li><li>Spotlight on a visual</li></ul></div>
-    <div class="card"><p class="when">Current page</p><h3>Where you were</h3><p>The page that was open, so a bookmark can also take the reader there.</p></div>
-  </div>
-  <p class="rule"><b>Not remembered:</b> the numbers themselves, or where a visual sits. Each of the three parts can be switched off per bookmark, under More options. <b>Selected visuals</b> limits a bookmark to the visuals you had selected.</p>
-  <p class="notes">One minute. A bookmark is a saved state, not a saved picture. Open the Bookmarks pane, click the three dots on a bookmark and show the ticks: Data, Display, Current page, All visuals, Selected visuals.</p>
-</section>
-
-<section class="slide adv" data-title="Bookmarks and the reader's filters">
-  <p class="kicker">Bookmarks · The part that catches people out</p>
-  <h2>Do the reader's filters survive? One tick decides.</h2>
-  <div class="cols" style="grid-template-columns:1fr 1fr">
-    <div class="card"><p class="when">Data ticked</p><h3>The bookmark replaces their filters</h3><p>The saved filters and slicers overwrite whatever the reader had picked.</p><p class="muted small" style="margin-top:8px">Use for a guided story or a Reset button.</p></div>
-    <div class="card"><p class="when">Data unticked</p><h3>Their filters carry through</h3><p>Only what is visible changes. Slicers and filters stay exactly as the reader left them.</p><p class="muted small" style="margin-top:8px">Use for opening a note or swapping one chart for another.</p></div>
-  </div>
-  <div class="eg">
-    <span>A reader picks <b>1990s</b>, then clicks <b>How to read this</b>.</span>
-    <span class="muted">Data ticked: the page jumps back to every decade, and their choice is gone.</span>
-    <span class="muted">Data unticked: still 1990s, with the note open. That is why lap 7 unticks Data.</span>
-  </div>
-  <p class="muted small">Worth knowing: a hidden slicer still filters the page.</p>
-  <p class="notes">Ninety seconds. This is the technical point most people meet as a bug: "my help button resets everything". Demo it if the finished file is open: pick 1990s on Drivers, then show what a bookmark with Data ticked would do. The fix is one tick.</p>
-</section>
-
-<section class="slide dark adv" data-title="Keeping bookmarks working">
-  <p class="kicker">Bookmarks · Looking after them</p>
-  <h2>Refresh is safe. Edits need Update.</h2>
-  <div class="cols" style="grid-template-columns:1fr 1fr;gap:16px 24px">
-    <div class="card"><p class="when">After a data refresh</p><h3>Nothing to do</h3><p>A bookmark stores settings, not numbers. It shows the new data through the same saved filters.</p></div>
-    <div class="card"><p class="when">After you change the page</p><h3>Update it</h3><p>Bookmarks never update themselves. Set the page how it should look, then More options, Update.</p></div>
-    <div class="card"><p class="when">After you add a slicer</p><h3>Check every bookmark</h3><p>Old bookmarks do not know it exists, so they clear it when they run. Decide its state, then Update.</p></div>
-    <div class="card"><p class="when">After you move things</p><h3>Nothing breaks</h3><p>Position and size are not part of a bookmark. Nothing snaps back, and nothing needs updating.</p></div>
-  </div>
-  <p class="rule"><b>Test as a reader.</b> Hold Ctrl and click a button in Desktop, or press View in the Bookmarks pane to play them in order.</p>
-  <p class="notes">One minute. The habit to pass on: after any change to a page that has bookmarks, click through each bookmark once. In the Power BI service readers can also save personal bookmarks of their own.</p>
-</section>
-
-<section class="slide" data-title="Make your own background">
-  <p class="kicker">Behind the look</p>
-  <h2>The layout is just a picture.</h2>
-  <div class="two">
-    <div>
-      <p class="lede">Panels, rail, photo and icons are one image. Every number on top is still live Power BI.</p>
-      <div class="cols" style="margin-top:18px;grid-template-columns:1fr 1fr">
-        <div><h3>PowerPoint</h3><p class="muted small">Open <code>design/Backgrounds.pptx</code>. Move the shapes. Export the slide as PNG.</p></div>
-        <div><h3>Figma</h3><p class="muted small">Drag a <code>.svg</code> from <code>design/backgrounds</code> into Figma. Edit. Export as PNG.</p></div>
-      </div>
-      <div class="row" style="margin-top:18px">
-        <button class="btn" id="swapBtn" type="button" aria-pressed="false">Put the visuals on top</button>
-      </div>
-    </div>
-    <div class="swap" id="swap">
-      <img src="design/backgrounds/main.png" alt="The background image on its own: a dark rail, a photo panel and empty white panels">
-      <img class="top" src="assets/finished-story.jpg" alt="The same layout with Power BI visuals placed in the panels">
-    </div>
-  </div>
-  <p class="notes">Open the PowerPoint file and drag one panel to show how little is involved. Slide size 13.333 by 7.5 inches equals 1280 by 720, the default Power BI page.</p>
-</section>
-
-<!-- ============ CLOSE ============ -->
 <section class="slide dark" data-title="What you used today" data-poll="steal">
   <p class="kicker">Recap</p>
   <h2>Eight things worth stealing.</h2>
@@ -959,18 +953,6 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   <p class="notes">Thirty seconds. Open the Data Stories Gallery in a browser tab and scroll once. Say: "When you are stuck for a layout, start here. When you want a different look in one click, the Themes Gallery."</p>
 </section>
 
-<section class="slide" data-title="In the real world">
-  <p class="kicker">From industry</p>
-  <h2>What happens to a dashboard at work.</h2>
-  <div class="cols">
-    <div class="card"><h3>It gets ten seconds</h3><p class="small" style="margin-top:8px">Most reports are opened on the way to something else. If the finding is not in the title, it is not found.</p></div>
-    <div class="card"><h3>It gets questioned</h3><p class="small" style="margin-top:8px">"Where is that number from?" Keep definitions and sources one click away. Trust is a design feature.</p></div>
-    <div class="card"><h3>It gets reused</h3><p class="small" style="margin-top:8px">A theme and a background become a template. The second report takes a fraction of the time.</p></div>
-    <div class="card"><h3>It gets judged on looks</h3><p class="small" style="margin-top:8px">Fair or not, a careful-looking report is assumed to have careful numbers. Use that.</p></div>
-  </div>
-  <p class="notes">Three minutes. One short story of your own per card. No questions to the room.</p>
-</section>
-
 <section class="slide" data-title="Questions people ask" id="faq">
   <p class="kicker">Before you ask</p>
   <h2>Four questions I usually get.</h2>
@@ -985,7 +967,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 
 <section class="slide dark" data-title="Take it with you">
   <p class="kicker">Keep going</p>
-  <h2>Take the files. Change the story.</h2>
+  <h2>Take the files. Make it yours.</h2>
   <p class="lede">Same data, new question: who dominates, which decade was most dangerous, which driver gained the most places?</p>
   <div class="row links" style="gap:26px;font-size:19px">
     <a href="https://github.com/Ribesh19/f1">Repository</a>
@@ -1045,7 +1027,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   /* ---- navigation, progress, notes, clock ---- */
   // One tab per part, like the page tabs of a report. A tab knows which slides it covers.
   const tabs = $('#tabs'), groups = [];
-  const TAB = { 1: 'Why design matters', 2: 'Dashboard design', 3: 'Choosing the visual', 4: 'My dashboards', 5: 'Your turn' };
+  const TAB = { 1: 'Audience', 2: 'Right visual', 3: 'Design', 4: 'Interactivity', 5: 'My dashboards', 6: 'Your turn' };
   slides.forEach((s, i) => {
     s.id = s.id || 's' + (i + 1);
     const label = i === 0 ? 'Start' : s.dataset.part ? s.dataset.part + '\u2002' + TAB[s.dataset.part] : s.dataset.title === 'What you used today' ? 'Wrap-up' : '';
@@ -1095,34 +1077,16 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   };
 
   /* ---- agenda ---- */
-  const parts = [['Why design matters', 'A before and after, and the ten-second test', '10 min'],
-    ['Dashboard design', 'Audience, layout, clutter, colour and words', '18 min'],
-    ['Choosing the visual', 'Question first, chart second', '12 min'],
-    ['Dashboards I have designed', 'Real examples and what they taught me', '10 min'],
+  const parts = [['Know your audience', 'Who reads it, and the ten seconds they give you', '8 min'],
+    ['Choose the right visual', 'Question first, chart second', '14 min'],
+    ['Design the page', 'Layout, clutter, colour, words, theme and background', '16 min'],
+    ['Make it interactive', 'Drill-through, bookmarks and tooltips', '6 min'],
+    ['Dashboards I have designed', 'Real examples and what they taught me', '6 min'],
     ['Your turn', 'Five laps in Power BI Desktop', '40 min']];
   parts.forEach((p, i) => {
     const target = slides.find(s => s.dataset.part === String(i + 1));
     $('#agenda').appendChild(el('a', { href: '#' + target.id }, `<span class="n">${i + 1}</span><div><b>${p[0]}</b><span>${p[1]}</span></div><span class="t">${p[2]}</span>`));
   });
-
-  /* ---- guess game ---- */
-  const gIn = $('#guessIn'), gOut = $('#guessOut');
-  let guessLabel = 'Your guess';  // becomes the room's average once phone guesses arrive
-  function drawGuess(stage) {
-    const guess = Number(gIn.value), rows = [[guessLabel, guess, GREY]];
-    if (stage >= 1) rows.push(['1980s, actual', 48, INK]);
-    if (stage >= 2) rows.push(['2020s, actual', 88, RED]);
-    const line = stage === 0 ? 'No peeking.' : stage === 1
-      ? (Math.abs(guess - 48) <= 5 ? 'Very close. It was 48%: fewer than half.' : 'It was 48%. More than half the grid did not make it.')
-      : 'Today it is 88%. That change is the story in the data.';
-    $('#guessDemo').innerHTML = `<svg viewBox="0 0 520 250" role="img" font-size="13"><text x="16" y="28" font-size="17" font-weight="700" fill="${INK}" font-family="Georgia">${line}</text>` +
-      rows.map(([n, v, c], i) => `<text x="16" y="${82 + i * 56}" fill="${MUT}">${n}</text><rect x="130" y="${62 + i * 56}" width="${v * 3.3}" height="32" fill="${c}"/><text x="${138 + v * 3.3}" y="${84 + i * 56}" font-weight="700" fill="${INK}">${v}%</text>`).join('') + '</svg>';
-  }
-  let guessStage = 0;
-  gIn.oninput = () => { gOut.textContent = gIn.value + '%'; drawGuess(guessStage); };
-  $('#guessGo').onclick = () => { guessStage = Math.max(guessStage, 1); drawGuess(guessStage); $('#guessNow').hidden = false; ppSync(); };
-  $('#guessNow').onclick = () => { guessStage = 2; drawGuess(2); };
-  drawGuess(0);
 
   /* ---- seven checks: a private score ---- */
   $$('.check input').forEach(box => { box.onchange = () => {
@@ -1151,17 +1115,6 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   }
   $('#flashGo').onclick = () => { flashPoll = 'find2'; flash('assets/finished-story.jpg'); ppSync(); };
   $('#flashPlain').onclick = () => { flashPoll = 'find1'; flash('assets/starter.jpg'); ppSync(); };
-
-  /* ---- storytelling: data + visuals + narrative ---- */
-  const trio = [
-    ['Data + Visuals', ['data', 'visuals'], 'Enlighten', 'A chart shows people something they could not see in a table. But nobody tells them why it matters.'],
-    ['Data + Narrative', ['data', 'narrative'], 'Explain', 'You make the case in words and numbers. It is correct, and most of the room has stopped listening.'],
-    ['Visuals + Narrative', ['visuals', 'narrative'], 'Engage', 'It looks great and reads well. Without solid data behind it, it is decoration.'],
-    ['All three', ['data', 'visuals', 'narrative'], 'Change', 'Trusted numbers, shown clearly, with a point. This is what gets a decision made.']];
-  chips($('#trioChips'), trio.map(t => t[0]), i => {
-    $$('#trio .ring').forEach(r => r.classList.toggle('on', trio[i][1].includes(r.dataset.k)));
-    $('#trioText').innerHTML = `<p class="kicker">You can</p><p class="big">${trio[i][2]}</p><p class="lede" style="margin-top:8px">${trio[i][3]}</p>`;
-  }, 3);
 
   /* ---- audience ---- */
   const audiences = [
@@ -1330,7 +1283,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   function drawRound() {
     const r = rounds[round], ch = chartsFor(r);
     clinic.innerHTML = ''; clinic.dataset.tiles = 'chart' + (round + 1); setReveal(false); $('#voteNote').textContent = '';
-    $('#voteQ').textContent = r.q; $('#voteStep').textContent = `Pick the chart · question ${round + 1} of ${rounds.length}`;
+    $('#voteQ').textContent = r.q; $('#voteStep').textContent = `Choose the right visual: question ${round + 1} of ${rounds.length}`;
     Object.keys(ch).forEach(k => {
       const b = el('button', { type: 'button', className: 'pick' + (k === r.best ? ' best' : '') }, `<b>${k} &nbsp; ${kinds[k]}</b><span class="votes"></span>${ch[k]()}<div class="verdict">${r.v[k]}</div>`);
       b.setAttribute('aria-pressed', 'false'); b.dataset.key = k;
@@ -1459,27 +1412,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
       if (slide.dataset.pollDyn === 'find') return flashPoll;
       return null;
     }
-    const revealed = poll => poll === 'guess' ? guessStage >= 1 : true;
     const bestOf = () => null;
-    // Number guesses, kept as [value, count]; anything that is not a number is ignored.
-    const guesses = () => Object.entries(tallies.guess || {}).map(([k, c]) => [Number(k), c]).filter(([v]) => Number.isFinite(v));
-    const BANDS = [['Under 40%', 0, 39], ['40 to 59%', 40, 59], ['60 to 79%', 60, 79], ['80% or more', 80, 100]];
-    function bands() {
-      const g = guesses(), n = g.reduce((a, [, c]) => a + c, 0);
-      return '<div class="rows">' + BANDS.map(([lab, lo, hi]) => {
-        const c = g.filter(([v]) => v >= lo && v <= hi).reduce((a, [, k]) => a + k, 0);
-        return `<div class="lrow${lo === 40 ? ' top' : ''}"><span class="l">${lab}</span><div class="bar"><i style="width:${pct(c, n)}%"></i></div><span class="p">${pct(c, n)}%</span></div>`;
-      }).join('') + '</div>';
-    }
-    // The room's average guess drives the big number and the slider on the guess slide.
-    function roomGuess() {
-      const g = guesses(), n = g.reduce((a, [, c]) => a + c, 0);
-      if (!n) { if (guessLabel !== 'Your guess') { guessLabel = 'Your guess'; $('#guessWho').textContent = guessLabel; drawGuess(guessStage); } return; }
-      const avg = Math.round(g.reduce((a, [v, c]) => a + v * c, 0) / n);
-      if (guessLabel === "The room's guess" && Number(gIn.value) === avg) return;
-      guessLabel = "The room's guess"; $('#guessWho').textContent = "The room's average guess";
-      gIn.value = avg; gOut.textContent = avg + '%'; drawGuess(guessStage);
-    }
     const pct = (c, n) => n ? Math.round(c / n * 100) : 0;
     // Results are shown as percentages only: a raw count would look thin in a small room.
     const head = (n, what) => `<div class="lh"><strong>${what || "The room's vote"}</strong><span>${n ? 'Votes are in.' : 'Waiting for votes.'} Vote at <b>${V.SHORT}/v</b></span></div>`;
@@ -1504,7 +1437,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
         } else if (box.hasAttribute('data-headonly')) {
           box.innerHTML = head(total(tallies[id]), "The room's vote: which will you use first?") + '<span class="sub">The share of the room that picked each one is shown beside its name.</span>';
         } else {
-          box.innerHTML = head(total(tallies[id]), id === 'guess' ? 'How the room guessed' : '') + (!revealed(id) ? '<span class="sub">The split appears when the answer is revealed.</span>' : id === 'guess' ? bands() : rows(id));
+          box.innerHTML = head(total(tallies[id])) + rows(id);
         }
       });
       $$('[data-tiles]').forEach(box => {
@@ -1520,7 +1453,6 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
         const note = $('.qnote', box.closest('.slide'));
         if (note && active === id) note.textContent = n ? (shown ? 'The red badges show how the room voted.' : 'Votes are in. Reveal to see how the room voted.') : `Waiting for votes. Vote at ${V.SHORT}/v`;
       });
-      roomGuess();
       const st = tallies.steal || {};
       const sn = total(st), slead = Math.max(0, ...Object.values(st));
       $$('.fv').forEach(e => { const c = st[e.dataset.key] || 0; e.textContent = c ? pct(c, sn) + '%' : ''; e.classList.toggle('lead', c > 0 && c === slead); });
