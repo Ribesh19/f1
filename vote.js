@@ -18,7 +18,12 @@ window.PPVote = (function () {
     chart2: { q: 'Has Formula 1 become more reliable? Pick the chart.', o: CHARTS },
     chart3: { q: 'How many races did Alain Prost win? Pick the chart.', o: CHARTS },
     steal: { q: 'Which of these will you use first?', o: [['theme', 'Theme files'], ['background', 'Canvas backgrounds'], ['bookmark', 'Bookmarks'],
-      ['tooltip', 'Report page tooltips'], ['title', 'Dynamic titles'], ['colour', 'Colour by measure'], ['play', 'Play axis'], ['drill', 'Drill-through']] }
+      ['tooltip', 'Report page tooltips'], ['title', 'Dynamic titles'], ['colour', 'Colour by measure'], ['play', 'Play axis'], ['drill', 'Drill-through']] },
+    colour: { q: 'Three bar charts, same numbers. Which shows who leads fastest?', o: [['A', 'A  A colour for every bar'], ['B', 'B  Every bar red'], ['C', 'C  Grey, the leader in red']] },
+    title: { q: 'Same chart, four titles. Which would you ship?', o: [['A', 'A  Finish Rate by Decade'], ['B', 'B  F1 Reliability Analysis Overview'],
+      ['C', 'C  Nine in ten cars now finish, up from half in the 1980s'], ['D', 'D  Is F1 more reliable?']] },
+    trap: { q: 'The 2020s bar looks nearly three times as tall. What is going on?', o: [['A', 'A  Reliability nearly tripled'], ['B', 'B  The axis does not start at zero'],
+      ['C', 'C  The data is wrong'], ['D', 'D  Nothing: it is a fair chart']] }
   };
 
   function rpc(fn, args) {

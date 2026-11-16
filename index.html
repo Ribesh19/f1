@@ -189,6 +189,15 @@ ul.ticks li.done::before{background:var(--red);border-color:var(--red)}
 .pick svg{width:100%;height:auto;display:block;margin-top:4px}
 .pick .verdict{display:none;position:absolute;left:8px;right:8px;bottom:8px;font-size:13px;padding:6px 10px;border-radius:6px;background:var(--ink);color:#fff}
 .clinic.revealed .verdict{display:block}
+.quiz.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.quiz.c1{grid-template-columns:1fr;max-width:none}
+.quizrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:14px;align-items:start;width:100%;max-width:calc((100vh - 330px)*2.05)}
+.stem{background:#fff;border-radius:12px;padding:12px}
+.stem svg{width:100%;height:auto;display:block}
+.pick .ttl{font-family:var(--serif);font-size:16px;line-height:1.2;margin:6px 0 0;min-height:60px;color:var(--ink)}
+.pick.text{padding:12px 14px}
+.pick.text b{font-size:16px}
+.pick.text .verdict,.quiz.c4 .pick .verdict{position:static;margin-top:8px}
 .clinic.revealed .pick.best{border-color:var(--red)}
 .clinic.revealed .pick.best .verdict{background:var(--red)}
 .trap{border-left:4px solid var(--red);padding-left:14px}
@@ -538,6 +547,21 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   <p class="notes">About one in twelve men has some colour vision deficiency, so red against green can vanish. One accent colour also survives a black-and-white printout.</p>
 </section>
 
+<section class="slide dark" data-title="Vote: pick the colour" data-poll="colour">
+  <p class="kicker">Pick the colour</p>
+  <h2>Who leads? Which version tells you fastest?</h2>
+  <div class="vote">
+    <div class="clinic quiz" data-quiz="colour"></div>
+    <div class="side">
+      <p class="lede">Three bar charts, identical numbers. Vote on your phone, or click one on your screen.</p>
+      <button class="btn red qthink" type="button">Three seconds to decide</button>
+      <button class="btn ghost qreveal" type="button">Show the verdicts</button>
+      <span class="muted small qnote"></span>
+    </div>
+  </div>
+  <p class="notes">One minute. Press "Three seconds to decide" and say your own pick while it counts. The point: colour is not decoration. A is what Power BI gives you when the driver goes in the legend; C is one conditional-formatting rule, which they build in lap 4.</p>
+</section>
+
 <section class="slide" data-title="Words are part of the design">
   <p class="kicker">Decision 5 · Words</p>
   <h2>A title should say what you found.</h2>
@@ -550,6 +574,21 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="demo" id="titleDemo"></div>
   </div>
   <p class="notes">Same chart, three titles. Power BI's default title is a label ("Finish Rate by Season"). A headline tells the reader what to look for before they look.</p>
+</section>
+
+<section class="slide" data-title="Vote: pick the title" data-poll="title">
+  <p class="kicker">Pick the title</p>
+  <h2>Same chart, four titles. Which would you ship?</h2>
+  <div class="vote">
+    <div class="clinic quiz c4" data-quiz="title"></div>
+    <div class="side">
+      <p class="lede">The chart never changes. Vote on your phone, or click one on your screen.</p>
+      <button class="btn red qthink" type="button">Three seconds to decide</button>
+      <button class="btn ghost qreveal" type="button">Show the verdicts</button>
+      <span class="muted small qnote"></span>
+    </div>
+  </div>
+  <p class="notes">One minute. A is Power BI's default, so expect votes for it: it looks normal because everyone has seen it a thousand times. C is long, and that is fine: a headline earns its length by saving the reader the work. D is worth defending: a question is honest when you have no finding yet.</p>
 </section>
 
 <section class="slide dark" data-title="Seven checks">
@@ -597,10 +636,25 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
       <button class="btn red" id="think" type="button">Three seconds to decide</button>
       <button class="btn ghost" id="reveal" type="button">Show the verdicts</button>
       <button class="btn ghost" id="voteNext" type="button">Next question</button>
-      <span class="muted small" id="voteNote"></span>
+      <span class="muted small qnote" id="voteNote"></span>
     </div>
   </div>
   <p class="notes">Press "Three seconds to decide": the countdown fills the silence and then reveals the answers by itself. The six options are on their phones for each question, and the vote count shows beside the buttons; the split appears on the charts with the verdicts. Say your own pick while it runs: "I would go A." Then press "Next question": there are three, and the best chart is different each time (bar, then line, then table). That is the lesson: the question picks the chart. The first one is also the Chart Clinic tab in Finished.pbix.</p>
+</section>
+
+<section class="slide dark" data-title="Vote: spot the trap" data-poll="trap">
+  <p class="kicker">Spot the trap</p>
+  <h2>The 2020s bar is nearly three times as tall. What is going on?</h2>
+  <div class="vote">
+    <div class="quizrow"><div class="stem"></div><div class="clinic quiz c1" data-quiz="trap"></div></div>
+    <div class="side">
+      <p class="lede">One chart, four explanations. Vote on your phone, or click one on your screen.</p>
+      <button class="btn red qthink" type="button">Three seconds to decide</button>
+      <button class="btn ghost qreveal" type="button">Show the verdicts</button>
+      <span class="muted small qnote"></span>
+    </div>
+  </div>
+  <p class="notes">One minute. Let the votes come in before you reveal: some people will say it is fair, because the labels are honest. The labels are right and the picture still lies. This sets up the next slide, three ways a chart misleads.</p>
 </section>
 
 <section class="slide dark" data-title="Three traps">
@@ -1237,7 +1291,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   function setReveal(on) { clinic.classList.toggle('revealed', on); $('#reveal').textContent = on ? 'Hide the verdicts' : 'Show the verdicts'; ppSync(); }
   function drawRound() {
     const r = rounds[round], ch = chartsFor(r);
-    clinic.innerHTML = ''; setReveal(false); $('#voteNote').textContent = '';
+    clinic.innerHTML = ''; clinic.dataset.tiles = 'chart' + (round + 1); setReveal(false); $('#voteNote').textContent = '';
     $('#voteQ').textContent = r.q; $('#voteStep').textContent = `Pick the chart · question ${round + 1} of ${rounds.length}`;
     Object.keys(ch).forEach(k => {
       const b = el('button', { type: 'button', className: 'pick' + (k === r.best ? ' best' : '') }, `<b>${k} &nbsp; ${kinds[k]}</b><span class="votes"></span>${ch[k]()}<div class="verdict">${r.v[k]}</div>`);
@@ -1309,6 +1363,48 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   });
 
 
+  /* ---- more votes of the same kind: one question, a few options, a verdict on each ---- */
+  const colourBars = mode => cv(WINS.slice(0, 8).map(([n, v], i) =>
+    `<text x="96" y="${23 + i * 27}" text-anchor="end" fill="${MUT}">${n}</text><rect x="102" y="${12 + i * 27}" width="${v / 105 * 200}" height="16" fill="${mode === 'A' ? PAL[i] : mode === 'B' || !i ? RED : GREY}"/><text x="${106 + v / 105 * 200}" y="${23 + i * 27}" fill="${MUT}">${v}</text>`).join(''));
+  const rateLine = () => `<svg viewBox="0 0 340 128" role="img" font-size="9"><polyline points="${RATE.map(([n, v], i) => (24 + i * 42) + ',' + (112 - (v - 40) * 1.9).toFixed(0)).join(' ')}" fill="none" stroke="${RED}" stroke-width="2.5"/>` +
+    RATE.map(([n], i) => `<text x="${24 + i * 42}" y="124" text-anchor="middle" fill="${MUT}">${n}</text>`).join('') + '</svg>';
+  const trapChart = cv(`<text x="14" y="20" font-size="13" font-weight="700" fill="${INK}" font-family="Georgia">Share of starters finishing the race</text>` +
+    [80, 85, 90].map(v => `<text x="36" y="${203 - (v - 80) * 16}" text-anchor="end" fill="${MUT}">${v}%</text><line x1="42" y1="${200 - (v - 80) * 16}" x2="330" y2="${200 - (v - 80) * 16}" stroke="${LINE}"/>`).join('') +
+    [['2010s', 83, GREY], ['2020s', 88, RED]].map(([n, v, c], i) => `<rect x="${92 + i * 126}" y="${200 - (v - 80) * 16}" width="72" height="${(v - 80) * 16}" fill="${c}"/><text x="${128 + i * 126}" y="${194 - (v - 80) * 16}" text-anchor="middle" font-weight="700" fill="${INK}">${v}%</text><text x="${128 + i * 126}" y="216" text-anchor="middle" fill="${MUT}">${n}</text>`).join(''));
+  const QUIZ = {
+    colour: { best: 'C', o: [
+      { k: 'A', label: 'A colour for every bar', svg: colourBars('A'), v: 'Eight colours, no meaning. Nowhere for the eye to land.' },
+      { k: 'B', label: 'Every bar red', svg: colourBars('B'), v: 'Calm, but nothing stands out. You still read every bar.' },
+      { k: 'C', label: 'Grey, the leader in red', svg: colourBars('C'), v: 'Best. Grey is the context. One colour is the point.' }] },
+    title: { best: 'C', o: [
+      { k: 'A', title: 'Finish Rate by Decade', svg: rateLine(), v: 'A label. It says what is plotted, not what to see.' },
+      { k: 'B', title: 'F1 Reliability Analysis Overview', svg: rateLine(), v: 'Sounds official. Says nothing.' },
+      { k: 'C', title: 'Nine in ten cars now finish, up from half in the 1980s', svg: rateLine(), v: 'Best. It states the finding. The chart is the evidence.' },
+      { k: 'D', title: 'Is F1 more reliable?', svg: rateLine(), v: 'Better than a label, but the reader still has to find the answer.' }] },
+    trap: { best: 'B', stem: trapChart, o: [
+      { k: 'A', label: 'Reliability nearly tripled', v: 'No. 83% to 88% is five points, not three times.' },
+      { k: 'B', label: 'The axis does not start at zero', v: 'Yes. It starts at 80%, so a small gap looks huge.' },
+      { k: 'C', label: 'The data is wrong', v: 'The numbers are right. The drawing is what misleads.' },
+      { k: 'D', label: 'Nothing: it is a fair chart', v: 'Bars show amounts by their length, so they must start at zero.' }] }
+  };
+  $$('.quiz').forEach(box => {
+    const def = QUIZ[box.dataset.quiz], home = box.closest('.slide'), rv = $('.qreveal', home), th = $('.qthink', home), note = $('.qnote', home);
+    box.dataset.tiles = box.dataset.quiz;
+    if (def.stem) $('.stem', home).innerHTML = def.stem;
+    const show = on => { box.classList.toggle('revealed', on); rv.textContent = on ? 'Hide the verdicts' : 'Show the verdicts'; ppSync(); };
+    def.o.forEach(o => {
+      const b = el('button', { type: 'button', className: 'pick' + (o.k === def.best ? ' best' : '') + (o.svg ? '' : ' text') },
+        `<b>${o.k}${o.label ? ' &nbsp; ' + o.label : ''}</b><span class="votes"></span>${o.title ? `<p class="ttl">${o.title}</p>` : ''}${o.svg || ''}<div class="verdict">${o.v}</div>`);
+      b.dataset.key = o.k; b.setAttribute('aria-pressed', 'false');
+      b.onclick = () => { $$('.pick', box).forEach(x => x.setAttribute('aria-pressed', x === b)); if (!document.body.classList.contains('host')) note.textContent = 'You picked ' + o.k + '.'; };
+      box.appendChild(b);
+    });
+    rv.onclick = () => show(!box.classList.contains('revealed'));
+    th.onclick = () => { let n = 3; show(false); th.disabled = true; th.textContent = n + ' ...';
+      const tick = setInterval(() => { n -= 1; if (n > 0) { th.textContent = n + ' ...'; return; }
+        clearInterval(tick); th.disabled = false; th.textContent = 'Three seconds to decide'; show(true); }, 1000); };
+  });
+
   /* ---- live voting: only the presenter's copy drives it; every other copy of this page is unchanged ---- */
   (function () {
     const V = window.PPVote, btn = $('#hostBtn'), stat = $('#voteStat'), clear = $('#voteReset');
@@ -1354,12 +1450,15 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
           box.innerHTML = head(total(tallies[id])) + (revealed(id) ? rows(id) : '<span class="muted small">The split appears when the answer is revealed.</span>');
         }
       });
-      const cp = 'chart' + (round + 1), ct = tallies[cp] || {}, cn = total(ct), shown = clinic.classList.contains('revealed');
-      $$('.pick', clinic).forEach(tile => {
-        const c = ct[tile.dataset.key] || 0, tag = $('.votes', tile);
-        if (tag) tag.textContent = shown && cn ? `${c} vote${c === 1 ? '' : 's'} · ${pct(c, cn)}%` : '';
+      $$('[data-tiles]').forEach(box => {
+        const id = box.dataset.tiles, tt = tallies[id] || {}, n = total(tt), shown = box.classList.contains('revealed');
+        $$('.pick', box).forEach(tile => {
+          const c = tt[tile.dataset.key] || 0, tag = $('.votes', tile);
+          if (tag) tag.textContent = shown && n ? `${c} vote${c === 1 ? '' : 's'} · ${pct(c, n)}%` : '';
+        });
+        const note = $('.qnote', box.closest('.slide'));
+        if (note && active === id) note.textContent = `${n} vote${n === 1 ? '' : 's'} in. Vote at ${V.SHORT}/v`;
       });
-      if (active === cp) $('#voteNote').textContent = `${cn} vote${cn === 1 ? '' : 's'} in. Vote at ${V.SHORT}/v`;
       const st = tallies.steal || {};
       $$('.fv').forEach(e => { e.textContent = st[e.dataset.key] ? st[e.dataset.key] : ''; });
       stat.textContent = !online ? 'Voting offline' : active ? `Voting open · ${total(tallies[active])}` : 'Voting ready';
