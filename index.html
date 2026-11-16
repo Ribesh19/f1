@@ -6,7 +6,7 @@
 <title>Pole Position: dashboards that tell a story</title>
 <style>
 :root{--ink:#15151a;--paper:#f4f1ea;--card:#fff;--red:#e10600;--muted:#6b675e;--line:#dcd7cb;--grey:#b9b4a7;
-  --serif:Georgia,"Times New Roman",serif;--sans:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;--mono:Consolas,"Courier New",monospace}
+  --serif:Georgia,"Times New Roman",serif;--sans:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;--mono:Consolas,"Courier New",monospace;--data:Bahnschrift,"DIN Alternate","Segoe UI",sans-serif}
 *{box-sizing:border-box}
 html{scroll-snap-type:y proximity;scroll-behavior:smooth}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.5}
@@ -18,9 +18,9 @@ h3{font-size:21px}
 p{margin:0;max-width:62ch}
 button{font:inherit;cursor:pointer}
 img{max-width:100%;display:block}
-.kicker{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.kicker{font-family:var(--data);font-stretch:87%;font-size:19px;font-weight:600;line-height:1.2;color:var(--red)}
 .lede{font-size:clamp(17px,1.5vw,22px);color:var(--muted)}
-.slide{min-height:100vh;scroll-snap-align:start;padding:84px clamp(20px,6vw,96px) 56px clamp(20px,9vw,140px);display:flex;flex-direction:column;justify-content:center;gap:22px;position:relative}
+.slide{min-height:100vh;scroll-snap-align:start;padding:84px clamp(20px,6vw,96px) 56px clamp(20px,6vw,96px);display:flex;flex-direction:column;justify-content:center;gap:22px;position:relative}
 .slide.dark{background:var(--ink);color:#fff}
 .slide.dark .lede,.slide.dark .muted{color:#b9b4a7}
 .muted{color:var(--muted)}
@@ -48,18 +48,22 @@ svg text{font-family:var(--sans)}
 
 /* top bar */
 #bar{position:fixed;inset:0 0 auto 0;height:52px;display:flex;align-items:center;gap:16px;padding:0 18px;background:var(--ink);color:#fff;z-index:20;font-size:14px}
-#bar b{letter-spacing:.12em;font-size:12px}
+#bar b{font-family:var(--data);font-stretch:87%;font-size:16px;font-weight:700;letter-spacing:.04em}
 #bar .mark{width:5px;height:24px;background:var(--red)}
-#where{color:#b9b4a7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#where{font-family:var(--data);font-size:15px;font-variant-numeric:tabular-nums;color:#b9b4a7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bar .spacer{flex:1}
-#clock{font-family:var(--mono);font-size:15px}
+#clock{font-family:var(--data);font-size:17px;font-variant-numeric:tabular-nums}
 #bar button{background:#2a2a32;color:#fff;border:0;border-radius:6px;padding:6px 11px;font-size:13px}
 #progress{position:fixed;top:52px;left:0;height:3px;background:var(--red);z-index:21;width:0}
-#dots{position:fixed;left:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:7px;z-index:15}
-#dots a{width:8px;height:8px;border-radius:50%;background:var(--grey);display:block}
-#dots a.part{border-radius:2px;margin-top:6px}
-#dots a.on{background:var(--red);transform:scale(1.5)}
-@media (max-width:700px){#dots,#where{display:none}}
+/* Page tabs, as along the bottom of a Power BI report: one tab for each part of the lecture */
+#tabs{position:fixed;inset:auto 0 0 0;height:38px;display:flex;align-items:stretch;gap:2px;padding:0 14px;background:var(--ink);z-index:20;font-family:var(--data);font-stretch:92%;font-size:16px}
+#tabs a{position:relative;display:flex;align-items:center;gap:9px;padding:0 16px;color:#b9b4a7;text-decoration:none;white-space:nowrap;border-top:3px solid transparent}
+#tabs a:hover{color:#fff}
+#tabs a:focus-visible{outline:3px solid var(--red);outline-offset:-3px}
+#tabs a.on{background:var(--paper);color:var(--ink);border-top-color:var(--red);font-weight:700}
+#tabs .n{font-weight:400;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+#tabs i{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--red)}
+@media (max-width:900px){#tabs,#where{display:none}}
 .notes{display:none;background:#fff8d6;color:#3a3200;border-left:4px solid #c9a227;padding:10px 14px;border-radius:6px;font-size:15px;max-width:90ch}
 body.show-notes .notes{display:block}
 
@@ -79,19 +83,19 @@ body.show-notes .notes{display:block}
 .laprow figure{margin:0;position:relative;border-radius:10px;overflow:hidden;background:#ddd}
 .laprow img{width:100%;aspect-ratio:16/9;object-fit:cover}
 .laprow .was img{opacity:.82}
-.laprow .tag{position:absolute;left:10px;bottom:10px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:4px}
+.laprow .tag{position:absolute;left:10px;bottom:10px;background:var(--ink);color:#fff;font-family:var(--data);font-size:15px;font-weight:600;line-height:1;padding:6px 9px;border-radius:4px}
 .laprow .now .tag{background:var(--red)}
 .laprow .hl{position:absolute;border:3px solid var(--red);border-radius:8px;outline:2px solid rgba(255,255,255,.75)}
 .laprow .arrow{color:var(--red);display:grid;place-items:center}
 .laprow .arrow .icon{width:34px;height:34px;stroke-width:2.2}
 .lapinfo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) auto;gap:30px;align-items:start;font-size:16px}
-.lapinfo h3{font-family:var(--sans);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.lapinfo h3{font-family:var(--data);font-stretch:87%;font-size:18px;font-weight:600;color:var(--muted);margin-bottom:4px}
 .dark .lapinfo h3{color:#b9b4a7}
 .lapinfo ul{margin:0;padding-left:18px}
 .lapinfo li{margin:3px 0}
 .lapslide{gap:16px}
 .meta{display:flex;gap:26px;flex-wrap:wrap;font-size:15px}
-.meta b{display:block;font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.meta b{display:block;font-family:var(--data);font-stretch:87%;font-size:16px;font-weight:600;color:var(--muted)}
 .uni{height:46px;width:auto}
 #bar .uni{height:22px}
 .part::after{content:"";position:absolute;right:clamp(20px,6vw,96px);bottom:8vh;width:190px;height:60px;background:url(assets/bcu-white.png) right bottom/contain no-repeat}
@@ -104,35 +108,35 @@ body.show-notes .notes{display:block}
 .part>img{width:100%;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
 @media (max-width:900px){.part{grid-template-columns:1fr}.part>img{display:none}}
 .part>*{position:relative}
-.part .num{font-family:var(--serif);font-size:clamp(90px,14vw,200px);line-height:.85;color:var(--red)}
+.part .num{font-family:var(--data);font-stretch:75%;font-weight:700;font-size:clamp(100px,16vw,230px);line-height:.8;color:var(--red)}
 .part .lede{color:#e6e2d8}
-.part .time{font-family:var(--mono);font-size:14px;letter-spacing:.08em;color:#e6e2d8}
+.part .time{font-family:var(--data);font-stretch:87%;font-size:20px;color:#e6e2d8}
 
 /* agenda */
 .agenda{display:grid;gap:0;max-width:980px}
-.agenda a{display:grid;grid-template-columns:64px 1fr auto;gap:18px;align-items:baseline;padding:14px 0;border-top:1px solid var(--line);color:inherit;text-decoration:none}
+.agenda a{display:grid;grid-template-columns:64px 1fr auto;gap:18px;align-items:baseline;padding:clamp(8px,1.4vh,14px) 0;border-top:1px solid var(--line);color:inherit;text-decoration:none}
 .agenda a:last-child{border-bottom:1px solid var(--line)}
-.agenda .n{font-family:var(--serif);font-size:34px;color:var(--red)}
+.agenda .n{font-family:var(--data);font-stretch:75%;font-weight:700;font-size:44px;line-height:1;color:var(--red)}
 .agenda b{font-size:21px;font-family:var(--serif)}
 .agenda span{display:block;color:var(--muted);font-size:15px}
-.agenda .t{font-family:var(--mono);font-size:14px;color:var(--muted)}
+.agenda .t{font-family:var(--data);font-size:19px;font-variant-numeric:tabular-nums;color:var(--muted)}
 
 /* about */
 .fact{border-top:3px solid var(--red);padding-top:14px}
 .fact b{display:block;font-family:var(--serif);font-size:22px}
 
 /* before / after */
-.compare{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;max-width:min(1000px,calc((100vh - 340px)*16/9));width:100%;background:#ddd}
+.compare{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;max-width:min(1000px,calc((100vh - 412px)*16/9));width:100%;background:#ddd}
 .compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .compare .after{clip-path:inset(0 0 0 var(--cut,100%))}
 .compare .handle{position:absolute;top:0;bottom:0;left:var(--cut,100%);width:3px;background:var(--red)}
-.compare .tag{position:absolute;top:12px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;padding:5px 9px;border-radius:4px}
+.compare .tag{position:absolute;top:12px;background:var(--ink);color:#fff;font-family:var(--data);font-size:16px;font-weight:600;line-height:1;padding:6px 10px;border-radius:4px}
 .compare.at-before .tag.r,.compare.at-after .tag.l{display:none}
 .compare .tag.l{left:12px}.compare .tag.r{right:12px;background:var(--red)}
 input[type=range]{width:100%;max-width:min(1000px,calc((100vh - 340px)*16/9));accent-color:var(--red)}
 
 /* five second test */
-#flash{position:relative;aspect-ratio:16/9;max-width:min(820px,calc((100vh - 380px)*16/9));width:100%;border-radius:12px;overflow:hidden;background:#22222a;display:grid;place-items:center;color:#fff;text-align:center}
+#flash{position:relative;aspect-ratio:16/9;max-width:min(820px,calc((100vh - 424px)*16/9));width:100%;border-radius:12px;overflow:hidden;background:#22222a;display:grid;place-items:center;color:#fff;text-align:center}
 .flashrow{display:grid;gap:32px;align-items:center}
 .flashcol{display:grid;gap:14px}
 body.host .flashrow{grid-template-columns:min(820px,calc((100vh - 430px)*16/9)) minmax(260px,1fr)}
@@ -155,7 +159,7 @@ body.host .flashrow{grid-template-columns:min(820px,calc((100vh - 430px)*16/9)) 
 #audOut{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:center}
 @media (max-width:900px){#audOut{grid-template-columns:1fr}}
 #audOut dl{margin:0;display:grid;gap:12px}
-#audOut dt{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+#audOut dt{font-family:var(--data);font-stretch:87%;font-size:17px;font-weight:600;color:var(--red)}
 #audOut dd{margin:0}
 
 /* hierarchy */
@@ -210,7 +214,7 @@ ul.ticks li.done::before{background:var(--red);border-color:var(--red)}
 .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
 #gallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;max-width:calc((100vh - 300px)*2.66)}
 #gallery .thumb{position:relative}
-#gallery .thumb b{position:absolute;left:10px;top:10px;margin:0;background:var(--ink);color:#fff;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:4px}
+#gallery .thumb b{position:absolute;left:10px;top:10px;margin:0;background:var(--ink);color:#fff;font-family:var(--data);font-size:15px;font-weight:600;line-height:1;padding:6px 9px;border-radius:4px}
 #gallery .thumb img{display:block}
 #gallery .legend{display:grid;gap:7px;align-content:center;font-size:13.5px;color:#b9b4a7;padding-left:6px}
 #gallery .legend b{color:#fff}
@@ -232,7 +236,7 @@ ol.steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:
 ol.steps li::before{content:counter(s);font-family:var(--mono);font-weight:700;background:var(--ink);color:#fff;border-radius:6px;height:27px;display:grid;place-items:center;font-size:14px}
 .dark ol.steps li::before{background:var(--red)}
 .timer{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.timer .t{font-family:var(--mono);font-size:40px;font-weight:700;min-width:5ch}
+.timer .t{font-family:var(--data);font-size:46px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;min-width:4.2ch}
 .timer.done .t{color:var(--red)}
 code{font-family:var(--mono);font-size:.92em;background:rgba(127,127,127,.16);padding:1px 6px;border-radius:4px}
 .swap{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%}
@@ -245,7 +249,7 @@ code{font-family:var(--mono);font-size:.92em;background:rgba(127,127,127,.16);pa
 .adv .card p,.adv .card li{font-size:16px}
 .adv .card ul{margin:0;padding-left:18px}
 .adv .card li{margin:2px 0}
-.when{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:4px}
+.when{font-family:var(--data);font-stretch:87%;font-size:17px;font-weight:600;line-height:1.2;color:var(--red);margin-bottom:4px}
 .adv .rule{font-size:17px;max-width:95ch}
 .adv .fact{padding-top:10px}
 .adv .fact b{font-size:19px}
@@ -273,7 +277,7 @@ body.host .nohost{display:none}
 .live .rows{display:grid;gap:9px}
 .lrow{display:grid;grid-template-columns:minmax(110px,200px) 1fr 70px;grid-template-areas:"l b p";gap:12px;align-items:center}
 .lrow .l{grid-area:l;font-weight:600}
-.lrow .p{grid-area:p;font-family:var(--serif);font-weight:700;font-size:26px;line-height:1;text-align:right;font-variant-numeric:tabular-nums}
+.lrow .p{grid-area:p;font-family:var(--data);font-weight:700;font-size:28px;line-height:1;text-align:right;font-variant-numeric:tabular-nums}
 .lrow .bar{grid-area:b;height:26px;background:rgba(127,127,127,.2);border-radius:4px;overflow:hidden}
 .lrow .bar i{display:block;height:100%;background:var(--grey)}
 .lrow.top .bar i{background:var(--red)}
@@ -283,13 +287,13 @@ body.host .nohost{display:none}
 .live.h .lrow .bar{height:16px}
 .slide.dark .live .lh span,.slide.dark .live .sub{color:#b9b4a7}
 /* On a tile: a labelled badge and a bar along the top edge, so a share is never a stray number */
-.pick .votes{display:none;position:absolute;right:8px;top:7px;font-size:15px;font-weight:700;line-height:1;background:var(--ink);color:#fff;border-radius:6px;padding:5px 9px}
+.pick .votes{display:none;position:absolute;right:8px;top:7px;font-family:var(--data);font-size:17px;font-weight:700;line-height:1;background:var(--ink);color:#fff;border-radius:6px;padding:5px 9px}
 .pick .votes.on{display:block}
 .pick .votes.lead{background:var(--red)}
-.pick .votes small{font-size:11px;font-weight:600;margin-right:5px;opacity:.85}
+.pick .votes small{font-size:13px;font-weight:600;margin-right:5px;opacity:.85}
 .pick .vbar{position:absolute;left:0;top:0;height:6px;width:0;background:var(--ink);border-radius:10px 0 0 0}
 .pick .vbar.lead{background:var(--red)}
-.fv{display:inline-block;font-style:normal;font-family:var(--sans);font-size:14px;font-weight:700;line-height:1;background:#fff;color:var(--ink);border-radius:5px;padding:4px 7px;margin-left:9px;vertical-align:2px}
+.fv{display:inline-block;font-style:normal;font-family:var(--data);font-size:16px;font-weight:700;line-height:1;background:#fff;color:var(--ink);border-radius:5px;padding:4px 7px;margin-left:9px;vertical-align:2px}
 .fv:empty{display:none}
 .fv.lead{background:var(--red);color:#fff}
 #voteStat{font-size:13px;color:#b9b4a7;cursor:pointer}
@@ -325,7 +329,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   <button id="toggleNotes" type="button" aria-pressed="false">Notes (N)</button>
 </div>
 <div id="progress"></div>
-<nav id="dots" aria-label="Sections"></nav>
+<nav id="tabs" aria-label="Parts of the lecture"></nav>
 
 <main>
 
@@ -420,7 +424,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="num">1</div>
     <h2>Why design matters</h2>
     <p class="lede">The same numbers can be ignored or acted on. The difference is design.</p>
-    <p class="time">ABOUT 10 MINUTES</p>
+    <p class="time">About 10 minutes</p>
   </div>
   <img src="assets/starter.jpg" alt="A plain Power BI report">
 </section>
@@ -503,7 +507,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="num">2</div>
     <h2>Dashboard design</h2>
     <p class="lede">Audience, layout, clutter, colour and words. Five decisions before you add a single chart.</p>
-    <p class="time">ABOUT 18 MINUTES</p>
+    <p class="time">About 18 minutes</p>
   </div>
   <img src="assets/finished-story.jpg" alt="A designed Power BI report page">
 </section>
@@ -636,7 +640,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="num">3</div>
     <h2>Choosing the visual</h2>
     <p class="lede">You know the chart types. This is about picking one on purpose.</p>
-    <p class="time">ABOUT 12 MINUTES</p>
+    <p class="time">About 12 minutes</p>
   </div>
   <img src="assets/lap-2.jpg" alt="A Power BI page with a line chart and column charts">
 </section>
@@ -701,7 +705,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="num">4</div>
     <h2>Dashboards I have designed</h2>
     <p class="lede">Real examples, and what each one taught me.</p>
-    <p class="time">ABOUT 10 MINUTES</p>
+    <p class="time">About 10 minutes</p>
   </div>
   <img src="assets/gallery-1-editorial.jpg" alt="An editorial style Power BI dashboard">
 </section>
@@ -728,7 +732,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <h2>Your turn</h2>
     <p class="lede">Two things open: <code>powerbi/Starter.pbix</code> to work in, and <a href="workbook.html" style="color:inherit"><code>workbook.html</code></a> for the clicks. This screen shows the goal and the clock.</p>
     <p class="small" style="margin-top:10px;color:#b9b4a7">No files yet? Go to <span style="font-family:var(--mono)">ribesh19.github.io/f1</span>, download the zip and unzip it.</p>
-    <p class="time">FIVE LAPS · ABOUT 40 MINUTES</p>
+    <p class="time">Five laps · about 40 minutes</p>
   </div>
   <img src="assets/finished-race.jpg" alt="The finished race page: an animated chart of drivers' career wins">
 </section>
@@ -1039,18 +1043,28 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   }
 
   /* ---- navigation, progress, notes, clock ---- */
-  const dots = $('#dots');
+  // One tab per part, like the page tabs of a report. A tab knows which slides it covers.
+  const tabs = $('#tabs'), groups = [];
+  const TAB = { 1: 'Why design matters', 2: 'Dashboard design', 3: 'Choosing the visual', 4: 'My dashboards', 5: 'Your turn' };
   slides.forEach((s, i) => {
     s.id = s.id || 's' + (i + 1);
-    const a = el('a', { href: '#' + s.id, title: s.dataset.title, className: s.dataset.part ? 'part' : '' });
-    a.setAttribute('aria-label', s.dataset.title);
-    dots.appendChild(a);
+    const label = i === 0 ? 'Start' : s.dataset.part ? s.dataset.part + '\u2002' + TAB[s.dataset.part] : s.dataset.title === 'What you used today' ? 'Wrap-up' : '';
+    if (!label) return;
+    const a = el('a', { href: '#' + s.id }, label + '<span class="n"></span><i></i>');
+    tabs.appendChild(a); groups.push({ from: i, a });
   });
+  groups.forEach((g, k) => { g.to = (groups[k + 1] ? groups[k + 1].from : slides.length) - 1; });
   let current = 0;
   const seen = new IntersectionObserver(entries => entries.forEach(e => {
     if (!e.isIntersecting) return;
     current = slides.indexOf(e.target);
-    $$('#dots a').forEach((d, i) => d.classList.toggle('on', i === current));
+    groups.forEach(g => {
+      const on = current >= g.from && current <= g.to, at = current - g.from + 1, of = g.to - g.from + 1;
+      g.a.classList.toggle('on', on);
+      if (on) g.a.setAttribute('aria-current', 'true'); else g.a.removeAttribute('aria-current');
+      $('.n', g.a).textContent = on ? at + ' of ' + of : '';
+      $('i', g.a).style.width = on ? (at / of * 100) + '%' : '0';
+    });
     $('#where').textContent = (current + 1) + ' / ' + slides.length + '   ' + e.target.dataset.title;
     $('#progress').style.width = ((current + 1) / slides.length * 100) + '%';
     ppSync();
