@@ -393,7 +393,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
       <p class="muted small nohost">Answer on your phone. The room's answers show on the big screen.</p>
     </div>
   </div>
-  <p class="notes">Wait here until the vote count stops climbing. Say: "Scan it once and leave it open. Every question I ask today will appear on your phone by itself." Read the room from the bars: if most say Never, slow down in the hands-on. Voting only runs from your own copy of this page: open it once with ?host on the end of the address and enter the PIN. If the bars stay empty, carry on: every later slide still works without votes.</p>
+  <p class="notes">Wait here until the bars stop moving. Say: "Scan it once and leave it open. Every question I ask today will appear on your phone by itself." Read the room from the bars: if most say Never, slow down in the hands-on. Voting only runs from your own copy of this page: open it once with ?host on the end of the address and enter the PIN. If the bars stay empty, carry on: every later slide still works without votes.</p>
 </section>
 
 <!-- ============ PART 1 ============ -->
@@ -420,7 +420,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="demo" id="guessDemo" aria-live="polite"></div>
   </div>
   <div class="live h" data-live="guess"></div>
-  <p class="notes">The question is on their phones: give it ten seconds and watch the vote count. You make a guess too, out loud: "I would have said about 70." Then lock it in: that also reveals how the room voted, with the right band in red. No volunteer needed. Then press "And today?".</p>
+  <p class="notes">The question is on their phones: give it ten seconds, until the slide says the votes are in. You make a guess too, out loud: "I would have said about 70." Then lock it in: that also reveals how the room voted, with the right band in red. No volunteer needed. Then press "And today?".</p>
 </section>
 
 <section class="slide" data-title="Same data, two reports">
@@ -639,7 +639,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
       <span class="muted small qnote" id="voteNote"></span>
     </div>
   </div>
-  <p class="notes">Press "Three seconds to decide": the countdown fills the silence and then reveals the answers by itself. The six options are on their phones for each question, and the vote count shows beside the buttons; the split appears on the charts with the verdicts. Say your own pick while it runs: "I would go A." Then press "Next question": there are three, and the best chart is different each time (bar, then line, then table). That is the lesson: the question picks the chart. The first one is also the Chart Clinic tab in Finished.pbix.</p>
+  <p class="notes">Press "Three seconds to decide": the countdown fills the silence and then reveals the answers by itself. The six options are on their phones for each question, and the slide says when votes are in; the split appears on the charts, as percentages, with the verdicts. Say your own pick while it runs: "I would go A." Then press "Next question": there are three, and the best chart is different each time (bar, then line, then table). That is the lesson: the question picks the chart. The first one is also the Chart Clinic tab in Finished.pbix.</p>
 </section>
 
 <section class="slide dark" data-title="Vote: spot the trap" data-poll="trap">
@@ -918,7 +918,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg><div><b>Play axis<em class="fv" data-key="play"></em></b><span>Four fields on a scatter chart and time starts moving.</span></div></div>
     <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><div><b>Drill-through<em class="fv" data-key="drill"></em></b><span>Right-click any driver to open a page about them.</span></div></div>
   </div>
-  <p class="notes">Their phones ask which one they will use first; the counts appear in red beside each name. None of these needs a custom visual, admin rights or the Power BI Service. All have exact clicks in the workbook.</p>
+  <p class="notes">Their phones ask which one they will use first; the share for each appears in red beside its name. None of these needs a custom visual, admin rights or the Power BI Service. All have exact clicks in the workbook.</p>
 </section>
 
 <section class="slide adv" data-title="Where to look next">
@@ -1425,7 +1425,8 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     const revealed = poll => poll === 'guess' ? guessStage >= 1 : true;
     const bestOf = poll => poll === 'guess' ? 'b' : null;
     const pct = (c, n) => n ? Math.round(c / n * 100) : 0;
-    const head = n => `<div class="lh"><span>Vote at <b>${V.SHORT}/v</b></span><span>${n} vote${n === 1 ? '' : 's'}</span></div>`;
+    // Results are shown as percentages only: a raw count would look thin in a small room.
+    const head = n => `<div class="lh"><span>Vote at <b>${V.SHORT}/v</b></span><span>${n ? 'Votes are in' : 'Waiting for votes'}</span></div>`;
     function rows(poll) {
       const t = tallies[poll] || {}, n = total(t), top = Math.max(0, ...Object.values(t)), best = bestOf(poll);
       return '<div class="rows">' + V.POLLS[poll].o.map(([k, lab]) => {
@@ -1454,14 +1455,15 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
         const id = box.dataset.tiles, tt = tallies[id] || {}, n = total(tt), shown = box.classList.contains('revealed');
         $$('.pick', box).forEach(tile => {
           const c = tt[tile.dataset.key] || 0, tag = $('.votes', tile);
-          if (tag) tag.textContent = shown && n ? `${c} vote${c === 1 ? '' : 's'} · ${pct(c, n)}%` : '';
+          if (tag) tag.textContent = shown && n ? `${pct(c, n)}%` : '';
         });
         const note = $('.qnote', box.closest('.slide'));
-        if (note && active === id) note.textContent = `${n} vote${n === 1 ? '' : 's'} in. Vote at ${V.SHORT}/v`;
+        if (note && active === id) note.textContent = `${n ? 'Votes are in.' : 'Waiting for votes.'} Vote at ${V.SHORT}/v`;
       });
       const st = tallies.steal || {};
-      $$('.fv').forEach(e => { e.textContent = st[e.dataset.key] ? st[e.dataset.key] : ''; });
-      stat.textContent = !online ? 'Voting offline' : active ? `Voting open · ${total(tallies[active])}` : 'Voting ready';
+      const sn = total(st);
+      $$('.fv').forEach(e => { e.textContent = st[e.dataset.key] ? pct(st[e.dataset.key], sn) + '%' : ''; });
+      stat.textContent = !online ? 'Voting offline' : active ? (total(tallies[active]) ? 'Voting open · votes in' : 'Voting open') : 'Voting ready';
       stat.classList.toggle('bad', !online);
     }
     async function pull(poll) {
