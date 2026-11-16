@@ -1,0 +1,1425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pole Position: dashboards that tell a story</title>
+<style>
+:root{--ink:#15151a;--paper:#f4f1ea;--card:#fff;--red:#e10600;--muted:#6b675e;--line:#dcd7cb;--grey:#b9b4a7;
+  --serif:Georgia,"Times New Roman",serif;--sans:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;--mono:Consolas,"Courier New",monospace}
+*{box-sizing:border-box}
+html{scroll-snap-type:y proximity;scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.5}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+h1,h2,h3{font-family:var(--serif);line-height:1.08;margin:0;text-wrap:balance}
+h1{font-size:clamp(40px,5.4vw,80px)}
+h2{font-size:clamp(30px,3.6vw,52px)}
+h3{font-size:21px}
+p{margin:0;max-width:62ch}
+button{font:inherit;cursor:pointer}
+img{max-width:100%;display:block}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.lede{font-size:clamp(17px,1.5vw,22px);color:var(--muted)}
+.slide{min-height:100vh;scroll-snap-align:start;padding:84px clamp(20px,6vw,96px) 56px clamp(20px,9vw,140px);display:flex;flex-direction:column;justify-content:center;gap:22px;position:relative}
+.slide.dark{background:var(--ink);color:#fff}
+.slide.dark .lede,.slide.dark .muted{color:#b9b4a7}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;align-items:start}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:36px;align-items:center}
+@media (max-width:1000px){.two{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:12px;padding:22px;color:var(--ink)}
+.dark .card{background:#22222a;color:#fff}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:8px;padding:11px 18px;font-weight:600}
+.btn.red{background:var(--red)}
+.btn.ghost{background:transparent;color:inherit;border:1.5px solid currentColor}
+.dark .btn:not(.red):not(.ghost){background:#fff;color:var(--ink)}
+:is(.btn,.chip,.pick,.thumb,.zone,input,a):focus-visible{outline:3px solid var(--red);outline-offset:3px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.icon{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.shot{aspect-ratio:16/9;object-fit:cover;border-radius:12px;box-shadow:0 18px 40px -24px rgba(21,21,26,.45);width:100%}
+.chip{background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 15px;color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.dark .chip{background:transparent;color:#fff;border-color:#55555f}
+.dark .chip[aria-pressed=true]{background:#fff;color:var(--ink);border-color:#fff}
+.source{font-size:13px;color:var(--muted)}
+.dark .source{color:#8e8a80}
+svg text{font-family:var(--sans)}
+
+/* top bar */
+#bar{position:fixed;inset:0 0 auto 0;height:52px;display:flex;align-items:center;gap:16px;padding:0 18px;background:var(--ink);color:#fff;z-index:20;font-size:14px}
+#bar b{letter-spacing:.12em;font-size:12px}
+#bar .mark{width:5px;height:24px;background:var(--red)}
+#where{color:#b9b4a7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bar .spacer{flex:1}
+#clock{font-family:var(--mono);font-size:15px}
+#bar button{background:#2a2a32;color:#fff;border:0;border-radius:6px;padding:6px 11px;font-size:13px}
+#progress{position:fixed;top:52px;left:0;height:3px;background:var(--red);z-index:21;width:0}
+#dots{position:fixed;left:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:7px;z-index:15}
+#dots a{width:8px;height:8px;border-radius:50%;background:var(--grey);display:block}
+#dots a.part{border-radius:2px;margin-top:6px}
+#dots a.on{background:var(--red);transform:scale(1.5)}
+@media (max-width:700px){#dots,#where{display:none}}
+.notes{display:none;background:#fff8d6;color:#3a3200;border-left:4px solid #c9a227;padding:10px 14px;border-radius:6px;font-size:15px;max-width:90ch}
+body.show-notes .notes{display:block}
+
+/* hero */
+#hero .grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:center}
+.stack{position:relative;aspect-ratio:16/10.5}
+.stack img{position:absolute;width:80%;border-radius:10px;box-shadow:0 18px 44px rgba(21,21,26,.22)}
+.stack .back{left:0;top:0;transform:rotate(-3deg)}
+.stack .front{right:0;bottom:0;transform:rotate(1.5deg)}
+.built{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 18px;width:100%;max-width:calc((100vh - 378px)*16/9)}
+.built figure{margin:0}
+.built img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.built figcaption{font-size:14px;margin-top:5px;color:var(--muted)}
+.built figcaption b{color:var(--ink)}
+.laprow,.lapinfo{width:100%;max-width:calc((100vh - 440px)*32/9 + 60px)}
+.laprow{display:grid;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);gap:12px;align-items:center}
+.laprow figure{margin:0;position:relative;border-radius:10px;overflow:hidden;background:#ddd}
+.laprow img{width:100%;aspect-ratio:16/9;object-fit:cover}
+.laprow .was img{opacity:.82}
+.laprow .tag{position:absolute;left:10px;bottom:10px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:4px}
+.laprow .now .tag{background:var(--red)}
+.laprow .hl{position:absolute;border:3px solid var(--red);border-radius:8px;outline:2px solid rgba(255,255,255,.75)}
+.laprow .arrow{color:var(--red);display:grid;place-items:center}
+.laprow .arrow .icon{width:34px;height:34px;stroke-width:2.2}
+.lapinfo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) auto;gap:30px;align-items:start;font-size:16px}
+.lapinfo h3{font-family:var(--sans);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.dark .lapinfo h3{color:#b9b4a7}
+.lapinfo ul{margin:0;padding-left:18px}
+.lapinfo li{margin:3px 0}
+.lapslide{gap:16px}
+.meta{display:flex;gap:26px;flex-wrap:wrap;font-size:15px}
+.meta b{display:block;font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.uni{height:46px;width:auto}
+#bar .uni{height:22px}
+.part::after{content:"";position:absolute;right:clamp(20px,6vw,96px);bottom:8vh;width:190px;height:60px;background:url(assets/bcu-white.png) right bottom/contain no-repeat}
+.qr{width:112px;background:#fff;color:var(--ink);padding:7px;border-radius:8px;flex:none}
+@media (max-width:900px){#hero .grid{grid-template-columns:1fr}}
+
+/* part dividers */
+.part{color:#fff;background-color:var(--ink);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);column-gap:56px;align-items:center}
+.part .txt{display:grid;gap:22px}
+.part>img{width:100%;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+@media (max-width:900px){.part{grid-template-columns:1fr}.part>img{display:none}}
+.part>*{position:relative}
+.part .num{font-family:var(--serif);font-size:clamp(90px,14vw,200px);line-height:.85;color:var(--red)}
+.part .lede{color:#e6e2d8}
+.part .time{font-family:var(--mono);font-size:14px;letter-spacing:.08em;color:#e6e2d8}
+
+/* agenda */
+.agenda{display:grid;gap:0;max-width:980px}
+.agenda a{display:grid;grid-template-columns:64px 1fr auto;gap:18px;align-items:baseline;padding:14px 0;border-top:1px solid var(--line);color:inherit;text-decoration:none}
+.agenda a:last-child{border-bottom:1px solid var(--line)}
+.agenda .n{font-family:var(--serif);font-size:34px;color:var(--red)}
+.agenda b{font-size:21px;font-family:var(--serif)}
+.agenda span{display:block;color:var(--muted);font-size:15px}
+.agenda .t{font-family:var(--mono);font-size:14px;color:var(--muted)}
+
+/* about */
+.fact{border-top:3px solid var(--red);padding-top:14px}
+.fact b{display:block;font-family:var(--serif);font-size:22px}
+
+/* before / after */
+.compare{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;max-width:min(1000px,calc((100vh - 340px)*16/9));width:100%;background:#ddd}
+.compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.compare .after{clip-path:inset(0 0 0 var(--cut,100%))}
+.compare .handle{position:absolute;top:0;bottom:0;left:var(--cut,100%);width:3px;background:var(--red)}
+.compare .tag{position:absolute;top:12px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;padding:5px 9px;border-radius:4px}
+.compare.at-before .tag.r,.compare.at-after .tag.l{display:none}
+.compare .tag.l{left:12px}.compare .tag.r{right:12px;background:var(--red)}
+input[type=range]{width:100%;max-width:min(1000px,calc((100vh - 340px)*16/9));accent-color:var(--red)}
+
+/* five second test */
+#flash{position:relative;aspect-ratio:16/9;max-width:min(820px,calc((100vh - 380px)*16/9));width:100%;border-radius:12px;overflow:hidden;background:#22222a;display:grid;place-items:center;color:#fff;text-align:center}
+body.host #flash{max-width:min(820px,calc((100vh - 450px)*16/9))}
+#flash img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
+#flash.showing img{opacity:1}
+#flash .count{position:absolute;right:12px;top:12px;background:var(--red);border-radius:50%;width:46px;height:46px;display:none;place-items:center;font-weight:700;font-size:20px}
+#flash.showing .count{display:grid}
+#flash.showing .msg{display:none}
+
+/* storytelling triangle */
+#trio svg{width:100%;max-width:520px;height:auto}
+#trio .ring{fill:none;stroke:#55555f;stroke-width:2;cursor:pointer}
+#trio .ring.on{stroke:var(--red);stroke-width:4;fill:rgba(225,6,0,.16)}
+#trio text{fill:#fff;font-size:17px;font-weight:600;pointer-events:none}
+#trioText{min-height:150px}
+#trioText .big{font-family:var(--serif);font-size:30px}
+
+/* audience */
+#audOut{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:center}
+@media (max-width:900px){#audOut{grid-template-columns:1fr}}
+#audOut dl{margin:0;display:grid;gap:12px}
+#audOut dt{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+#audOut dd{margin:0}
+
+/* hierarchy */
+.spot{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%}
+.spot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.spot .zone{position:absolute;border:3px solid var(--red);border-radius:8px;background:transparent;padding:0;box-shadow:0 0 0 2000px rgba(21,21,26,.62)}
+.spot .zone i{position:absolute;left:-3px;top:-3px;background:var(--red);color:#fff;font:700 15px var(--mono);width:28px;height:28px;display:grid;place-items:center;border-radius:6px 0 6px 0;font-style:normal}
+#zoneText{min-height:110px}
+#zoneText b{font-family:var(--serif);font-size:26px;display:block}
+
+/* declutter, colour, title, baseline demos */
+.demo{background:#fff;border-radius:12px;padding:16px;color:var(--ink)}
+.demo svg{width:100%;height:auto;display:block}
+ul.ticks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+ul.ticks li{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;color:var(--muted)}
+ul.ticks li::before{content:"";width:16px;height:16px;border:2px solid var(--grey);border-radius:4px;margin-top:5px}
+ul.ticks li.done{color:inherit}
+ul.ticks li.done::before{background:var(--red);border-color:var(--red)}
+.dark ul.ticks li{color:#8e8a80}.dark ul.ticks li.done{color:#fff}
+
+/* chart chooser and clinic */
+#advice{display:grid;grid-template-columns:150px 1fr;gap:24px;align-items:center;min-height:150px}
+#advice svg{width:150px;height:110px}
+#advice .use{font-family:var(--serif);font-size:28px}
+.vote{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:24px;align-items:start}
+.vote .side{display:grid;gap:12px;justify-items:start}
+.vote .side .lede{font-size:17px}
+@media (max-width:900px){.vote{grid-template-columns:1fr}}
+.clinic{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;max-width:calc((100vh - 330px)*2.05)}
+@media (max-width:900px){.clinic{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pick{position:relative;background:#fff;border:2px solid transparent;border-radius:12px;padding:8px 10px;text-align:left;color:var(--ink)}
+.pick[aria-pressed=true]{border-color:var(--ink)}
+.pick b{font-size:14px}
+.pick svg{width:100%;height:auto;display:block;margin-top:4px}
+.pick .verdict{display:none;position:absolute;left:8px;right:8px;bottom:8px;font-size:13px;padding:6px 10px;border-radius:6px;background:var(--ink);color:#fff}
+.clinic.revealed .verdict{display:block}
+.clinic.revealed .pick.best{border-color:var(--red)}
+.clinic.revealed .pick.best .verdict{background:var(--red)}
+.trap{border-left:4px solid var(--red);padding-left:14px}
+.trap b{display:block}
+
+/* my work and gallery */
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+#gallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;max-width:calc((100vh - 300px)*2.66)}
+#gallery .thumb{position:relative}
+#gallery .thumb b{position:absolute;left:10px;top:10px;margin:0;background:var(--ink);color:#fff;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:4px}
+#gallery .thumb img{display:block}
+#gallery .legend{display:grid;gap:7px;align-content:center;font-size:13.5px;color:#b9b4a7;padding-left:6px}
+#gallery .legend b{color:#fff}
+.thumb{background:none;border:0;padding:0;text-align:left;color:inherit}
+.thumb img{aspect-ratio:16/9;width:100%;object-fit:cover;border-radius:10px;border:2px solid transparent}
+.thumb:hover img{border-color:var(--red)}
+.thumb b{display:block;margin-top:8px}
+.thumb span{font-size:14px;color:var(--muted)}
+.dark .thumb span{color:#b9b4a7}
+#lightbox{position:fixed;inset:0;background:rgba(10,10,12,.93);z-index:40;display:none;place-items:center;padding:24px}
+#lightbox.open{display:grid}
+#lightbox img{max-height:80vh;border-radius:10px}
+#lightbox p{color:#fff;margin:12px auto 0;text-align:center;max-width:70ch}
+#lightbox button{position:absolute;top:18px;right:18px}
+
+/* rounds */
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:9px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;font-size:16.5px}
+ol.steps li::before{content:counter(s);font-family:var(--mono);font-weight:700;background:var(--ink);color:#fff;border-radius:6px;height:27px;display:grid;place-items:center;font-size:14px}
+.dark ol.steps li::before{background:var(--red)}
+.timer{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.timer .t{font-family:var(--mono);font-size:40px;font-weight:700;min-width:5ch}
+.timer.done .t{color:var(--red)}
+code{font-family:var(--mono);font-size:.92em;background:rgba(127,127,127,.16);padding:1px 6px;border-radius:4px}
+.swap{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%}
+.swap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s}
+.swap .top{opacity:0}.swap.on .top{opacity:1}
+@media (prefers-reduced-motion:reduce){.swap img{transition:none}}
+
+.adv .card{padding:18px 20px}
+.adv .card h3{font-size:20px;margin-bottom:6px}
+.adv .card p,.adv .card li{font-size:16px}
+.adv .card ul{margin:0;padding-left:18px}
+.adv .card li{margin:2px 0}
+.when{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:4px}
+.adv .rule{font-size:17px;max-width:95ch}
+.adv .fact{padding-top:10px}
+.adv .fact b{font-size:19px}
+.adv .fact span{font-size:16px}
+.adv .eg{border-left:4px solid var(--red);padding:2px 0 2px 16px;font-size:16px;display:grid;gap:4px}
+.adv a.card{text-decoration:none;display:block;border:2px solid transparent}
+.adv a.card:hover,.adv a.card:focus-visible{border-color:var(--red)}
+.adv .url{display:block;margin-top:12px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.buildrow{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:28px;align-items:center}
+@media (max-width:900px){.buildrow{grid-template-columns:1fr}}
+.getit{background:var(--card);border-radius:12px;padding:18px;display:grid;gap:10px;justify-items:start;font-size:16px}
+.getit .qr{width:150px;border:1px solid var(--line)}
+.getit .addr{font-family:var(--mono);font-size:19px;font-weight:700}
+.getit ul{margin:0;padding-left:18px}
+.getit a{color:inherit;font-weight:600;text-decoration-color:var(--red);text-underline-offset:3px}
+.live{display:none;gap:7px;font-size:15px}
+body.host .live{display:grid}
+body.host .nohost{display:none}
+.live .lh{display:flex;gap:14px;justify-content:space-between;align-items:baseline;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.live .lh b{color:var(--red);text-transform:none;letter-spacing:0;font-family:var(--mono);font-size:14px}
+.live .rows{display:grid;gap:7px}
+.lrow{display:grid;grid-template-columns:minmax(90px,170px) 1fr 46px;grid-template-areas:"l b p";gap:10px;align-items:center}
+.lrow .l{grid-area:l}.lrow .p{grid-area:p;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.lrow .bar{grid-area:b;height:18px;background:rgba(127,127,127,.2);border-radius:3px;overflow:hidden}
+.lrow .bar i{display:block;height:100%;background:var(--grey)}
+.lrow.top .bar i{background:var(--red)}
+.live.h .rows{grid-template-columns:repeat(4,1fr);gap:16px}
+.live.h .lrow{grid-template-columns:1fr auto;grid-template-areas:"l p" "b b";gap:3px 8px}
+.slide.dark .live .lh{color:#b9b4a7}
+.pick .votes{position:absolute;right:10px;top:8px;font-size:13px;font-weight:700;color:var(--red)}
+.fv{font-style:normal;color:var(--red);font-weight:700;margin-left:8px;font-family:var(--sans)}
+#voteStat{font-size:13px;color:#b9b4a7;cursor:pointer}
+#voteStat.bad{color:#ff8a80}
+.feature{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start}
+.feature b{display:block}
+.feature span{color:var(--muted);font-size:16px}
+.check{counter-reset:c;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px 28px;margin:0;padding:0;list-style:none}
+.check li{counter-increment:c;display:grid;grid-template-columns:34px 1fr;gap:10px;padding:10px 0;border-top:1px solid #3a3a44}
+.check label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:3px;accent-color:var(--red);flex:none}
+.check li::before{content:counter(c);font-family:var(--serif);font-size:26px;color:var(--red);line-height:1}
+.faq{display:grid;gap:10px;max-width:900px}
+.faq details{background:#fff;border-radius:10px;padding:14px 18px}
+.faq summary{font-family:var(--serif);font-size:22px;cursor:pointer}
+.faq details p{margin-top:8px;color:var(--muted);max-width:none}
+.links a{color:inherit;font-weight:600;text-decoration-color:var(--red);text-underline-offset:4px}
+footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <span class="mark"></span><b>POLE POSITION</b>
+  <span id="where"></span>
+  <span class="spacer"></span>
+  <img class="uni" src="assets/bcu-white.png" alt="Birmingham City University">
+  <span id="voteStat" title="Live voting. Click to stop presenting votes on this computer." hidden></span>
+  <button id="voteReset" type="button" hidden>Clear votes</button>
+  <button id="hostBtn" type="button" hidden>Start live vote</button>
+  <span id="clock" title="Session clock">00:00</span>
+  <button id="startClock" type="button">Start clock</button>
+  <button id="toggleNotes" type="button" aria-pressed="false">Notes (N)</button>
+</div>
+<div id="progress"></div>
+<nav id="dots" aria-label="Sections"></nav>
+
+<main>
+
+<!-- ============ OPENING ============ -->
+<section class="slide" id="hero" data-title="Welcome">
+  <div class="grid">
+    <div style="display:grid;gap:18px">
+      <img class="uni" src="assets/bcu-charcoal.png" alt="Birmingham City University">
+      <h1>Dashboard design in Power BI.</h1>
+      <p class="lede">How to choose the right visual, lay out a page and tell a story with data. Then you redesign a plain report yourself.</p>
+      <div class="meta">
+        <div><b>With</b>Ribesh Maharjan</div>
+      </div>
+      <div><p><b>Follow along on your own screen.</b></p><p style="font-family:var(--mono);font-size:22px;font-weight:700">ribesh19.github.io/f1</p><p class="muted small">Everything I click, you can click.</p></div>
+    </div>
+    <div class="stack">
+      <img class="back" src="assets/starter.jpg" alt="A plain Power BI report with default colours">
+      <img class="front" src="assets/finished-story.jpg" alt="The same report after a redesign, with a headline and three clear charts">
+    </div>
+  </div>
+  <p class="notes">Say: "Type this address and keep the page open. Every demo I do, you can do on your own screen, at your own pace." The QR code and the download are on the What you will build slide; the voting code is the slide after it. Press Start clock. Arrows move between sections; N shows notes.</p>
+</section>
+
+<section class="slide" data-title="About me">
+  <p class="kicker">Hello</p>
+  <h2>I am Ribesh Maharjan.</h2>
+  <p class="lede">I design and deliver business intelligence solutions in industry, from messy source data to the report on someone's screen.</p>
+  <div class="cols" style="margin-top:8px">
+    <div class="fact"><b>What I do</b><span class="muted">Data models, Power BI reports and the design decisions that make people actually use them.</span></div>
+    <div class="fact"><b>Today's topic</b><span class="muted">Dashboard design and choosing the right visual, with real examples from my own work.</span></div>
+    <div class="fact"><b>What you leave with</b><span class="muted">A report you redesigned yourself, plus the files, theme and guides to do it again.</span></div>
+  </div>
+  <p class="small links"><a href="https://www.linkedin.com/in/ribesh-maharjan/">linkedin.com/in/ribesh-maharjan</a></p>
+  <p class="notes">One minute. Say where you work and one project you are proud of. Edit the three boxes in index.html if you want different wording.</p>
+</section>
+
+<section class="slide" data-title="Today">
+  <p class="kicker">The plan</p>
+  <h2>What we will cover.</h2>
+  <div class="agenda" id="agenda"></div>
+  <p class="notes">Half talking, half doing. Tell them the workshop starts at about minute 45, so the download matters.</p>
+</section>
+
+<section class="slide" data-title="What you will build">
+  <p class="kicker">By the end of today</p>
+  <h2>You will have built this.</h2>
+  <div class="buildrow">
+  <div class="built">
+    <figure><img src="assets/finished-story.jpg" alt="A report page with a headline, three story numbers and three charts"><figcaption><b>A page that makes its point.</b> Headline, three numbers, the right charts.</figcaption></figure>
+    <figure><img src="assets/finished-drivers.jpg" alt="A bar chart with one red bar and a title naming the leader"><figcaption><b>A title that rewrites itself.</b> Click a decade and it follows.</figcaption></figure>
+    <figure><img src="assets/finished-race.jpg" alt="A scatter chart with a play button and a year in the corner"><figcaption><b>A chart that moves.</b> Press play: 76 seasons in twenty seconds.</figcaption></figure>
+    <figure><img src="assets/finished-profile.jpg" alt="A profile page for one driver with career numbers"><figcaption><b>A page for every driver.</b> Right-click any name to open it.</figcaption></figure>
+  </div>
+    <aside class="getit">
+      <p class="when">Get everything here</p>
+      <div class="qr"><svg role="img" aria-label="QR code for ribesh19.github.io/f1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 31" shape-rendering="crispEdges"><path fill="currentColor" d="M1 1h7v1h-7zM11 1h4v1h-4zM17 1h1v1h-1zM19 1h2v1h-2zM23 1h7v1h-7zM1 2h1v1h-1zM7 2h1v1h-1zM9 2h3v1h-3zM15 2h3v1h-3zM20 2h2v1h-2zM23 2h1v1h-1zM29 2h1v1h-1zM1 3h1v1h-1zM3 3h3v1h-3zM7 3h1v1h-1zM10 3h1v1h-1zM13 3h3v1h-3zM17 3h1v1h-1zM19 3h1v1h-1zM23 3h1v1h-1zM25 3h3v1h-3zM29 3h1v1h-1zM1 4h1v1h-1zM3 4h3v1h-3zM7 4h1v1h-1zM10 4h3v1h-3zM14 4h3v1h-3zM20 4h2v1h-2zM23 4h1v1h-1zM25 4h3v1h-3zM29 4h1v1h-1zM1 5h1v1h-1zM3 5h3v1h-3zM7 5h1v1h-1zM9 5h2v1h-2zM15 5h1v1h-1zM18 5h3v1h-3zM23 5h1v1h-1zM25 5h3v1h-3zM29 5h1v1h-1zM1 6h1v1h-1zM7 6h1v1h-1zM11 6h1v1h-1zM14 6h1v1h-1zM19 6h2v1h-2zM23 6h1v1h-1zM29 6h1v1h-1zM1 7h7v1h-7zM9 7h1v1h-1zM11 7h1v1h-1zM13 7h1v1h-1zM15 7h1v1h-1zM17 7h1v1h-1zM19 7h1v1h-1zM21 7h1v1h-1zM23 7h7v1h-7zM10 8h6v1h-6zM17 8h2v1h-2zM20 8h1v1h-1zM1 9h1v1h-1zM3 9h1v1h-1zM5 9h1v1h-1zM7 9h1v1h-1zM10 9h1v1h-1zM12 9h2v1h-2zM15 9h2v1h-2zM18 9h1v1h-1zM20 9h2v1h-2zM25 9h1v1h-1zM28 9h1v1h-1zM1 10h3v1h-3zM8 10h1v1h-1zM13 10h1v1h-1zM15 10h2v1h-2zM21 10h1v1h-1zM23 10h1v1h-1zM26 10h1v1h-1zM29 10h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM7 11h1v1h-1zM11 11h4v1h-4zM19 11h1v1h-1zM21 11h1v1h-1zM23 11h3v1h-3zM27 11h3v1h-3zM2 12h1v1h-1zM9 12h5v1h-5zM16 12h1v1h-1zM18 12h4v1h-4zM23 12h1v1h-1zM28 12h1v1h-1zM1 13h1v1h-1zM3 13h7v1h-7zM11 13h1v1h-1zM13 13h1v1h-1zM17 13h2v1h-2zM22 13h2v1h-2zM26 13h1v1h-1zM28 13h2v1h-2zM6 14h1v1h-1zM9 14h1v1h-1zM12 14h3v1h-3zM16 14h2v1h-2zM21 14h3v1h-3zM26 14h1v1h-1zM29 14h1v1h-1zM1 15h1v1h-1zM3 15h3v1h-3zM7 15h4v1h-4zM12 15h1v1h-1zM15 15h4v1h-4zM26 15h1v1h-1zM28 15h2v1h-2zM6 16h1v1h-1zM13 16h3v1h-3zM17 16h4v1h-4zM22 16h1v1h-1zM24 16h1v1h-1zM26 16h1v1h-1zM28 16h1v1h-1zM1 17h1v1h-1zM4 17h1v1h-1zM6 17h2v1h-2zM9 17h1v1h-1zM11 17h3v1h-3zM15 17h2v1h-2zM18 17h4v1h-4zM23 17h1v1h-1zM26 17h1v1h-1zM28 17h2v1h-2zM5 18h1v1h-1zM10 18h3v1h-3zM15 18h2v1h-2zM21 18h1v1h-1zM23 18h1v1h-1zM26 18h2v1h-2zM29 18h1v1h-1zM1 19h1v1h-1zM5 19h3v1h-3zM9 19h2v1h-2zM12 19h3v1h-3zM18 19h1v1h-1zM23 19h3v1h-3zM28 19h2v1h-2zM2 20h5v1h-5zM8 20h1v1h-1zM16 20h1v1h-1zM18 20h2v1h-2zM21 20h1v1h-1zM24 20h3v1h-3zM28 20h1v1h-1zM1 21h1v1h-1zM4 21h7v1h-7zM13 21h1v1h-1zM17 21h2v1h-2zM21 21h5v1h-5zM9 22h1v1h-1zM11 22h2v1h-2zM14 22h1v1h-1zM16 22h3v1h-3zM20 22h2v1h-2zM25 22h1v1h-1zM27 22h3v1h-3zM1 23h7v1h-7zM11 23h1v1h-1zM13 23h1v1h-1zM15 23h4v1h-4zM20 23h2v1h-2zM23 23h1v1h-1zM25 23h2v1h-2zM28 23h2v1h-2zM1 24h1v1h-1zM7 24h1v1h-1zM11 24h1v1h-1zM13 24h3v1h-3zM17 24h2v1h-2zM21 24h1v1h-1zM25 24h2v1h-2zM28 24h2v1h-2zM1 25h1v1h-1zM3 25h3v1h-3zM7 25h1v1h-1zM9 25h3v1h-3zM13 25h1v1h-1zM15 25h5v1h-5zM21 25h5v1h-5zM28 25h1v1h-1zM1 26h1v1h-1zM3 26h3v1h-3zM7 26h1v1h-1zM10 26h2v1h-2zM14 26h3v1h-3zM18 26h5v1h-5zM24 26h2v1h-2zM27 26h1v1h-1zM1 27h1v1h-1zM3 27h3v1h-3zM7 27h1v1h-1zM9 27h5v1h-5zM15 27h1v1h-1zM19 27h2v1h-2zM22 27h1v1h-1zM24 27h3v1h-3zM29 27h1v1h-1zM1 28h1v1h-1zM7 28h1v1h-1zM11 28h1v1h-1zM14 28h1v1h-1zM17 28h9v1h-9zM28 28h1v1h-1zM1 29h7v1h-7zM9 29h1v1h-1zM13 29h1v1h-1zM15 29h5v1h-5zM21 29h3v1h-3zM25 29h2v1h-2zM28 29h2v1h-2z"/></svg></div>
+      <p class="addr">ribesh19.github.io/f1</p>
+      <ul><li>These slides</li><li>The <a href="workbook.html">workbook</a>: every click</li><li>The <a href="https://github.com/Ribesh19/f1/archive/refs/heads/main.zip">files to download</a></li></ul>
+      <p class="muted small">On GitHub: <a href="https://github.com/Ribesh19/f1">github.com/Ribesh19/f1</a></p>
+    </aside>
+  </div>
+  <p class="notes">Thirty seconds, plus time for people to type the address or scan the code: this is the slide to pause on until laptops are open. Do not explain how any of it works. Say: "You start from a plain file and build all four of these yourself in the last part." If Finished.pbix is open, press Play on The race once and move on.</p>
+</section>
+
+<section class="slide dark" data-title="Join the vote" data-poll="warm">
+  <div class="two">
+    <div style="display:grid;gap:16px;justify-items:start">
+      <p class="kicker">One scan, then leave it open</p>
+      <h2>Vote from your phone.</h2>
+      <div class="row" style="gap:20px;flex-wrap:nowrap">
+        <div class="qr" style="width:176px"><svg role="img" aria-label="QR code for the voting page, ribesh19.github.io/f1/v" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 31" shape-rendering="crispEdges"><path fill="currentColor" d="M1 1h7v1h-7zM11 1h1v1h-1zM14 1h3v1h-3zM19 1h3v1h-3zM23 1h7v1h-7zM1 2h1v1h-1zM7 2h1v1h-1zM11 2h1v1h-1zM13 2h7v1h-7zM21 2h1v1h-1zM23 2h1v1h-1zM29 2h1v1h-1zM1 3h1v1h-1zM3 3h3v1h-3zM7 3h1v1h-1zM9 3h2v1h-2zM12 3h3v1h-3zM16 3h1v1h-1zM19 3h1v1h-1zM21 3h1v1h-1zM23 3h1v1h-1zM25 3h3v1h-3zM29 3h1v1h-1zM1 4h1v1h-1zM3 4h3v1h-3zM7 4h1v1h-1zM9 4h2v1h-2zM15 4h2v1h-2zM18 4h2v1h-2zM21 4h1v1h-1zM23 4h1v1h-1zM25 4h3v1h-3zM29 4h1v1h-1zM1 5h1v1h-1zM3 5h3v1h-3zM7 5h1v1h-1zM9 5h1v1h-1zM11 5h2v1h-2zM16 5h6v1h-6zM23 5h1v1h-1zM25 5h3v1h-3zM29 5h1v1h-1zM1 6h1v1h-1zM7 6h1v1h-1zM9 6h1v1h-1zM11 6h3v1h-3zM18 6h1v1h-1zM23 6h1v1h-1zM29 6h1v1h-1zM1 7h7v1h-7zM9 7h1v1h-1zM11 7h1v1h-1zM13 7h1v1h-1zM15 7h1v1h-1zM17 7h1v1h-1zM19 7h1v1h-1zM21 7h1v1h-1zM23 7h7v1h-7zM9 8h1v1h-1zM11 8h1v1h-1zM15 8h1v1h-1zM17 8h1v1h-1zM19 8h1v1h-1zM1 9h1v1h-1zM3 9h5v1h-5zM10 9h2v1h-2zM13 9h1v1h-1zM17 9h2v1h-2zM20 9h1v1h-1zM23 9h5v1h-5zM3 10h1v1h-1zM6 10h1v1h-1zM14 10h3v1h-3zM18 10h4v1h-4zM23 10h3v1h-3zM29 10h1v1h-1zM1 11h3v1h-3zM5 11h1v1h-1zM7 11h1v1h-1zM9 11h1v1h-1zM11 11h1v1h-1zM13 11h5v1h-5zM19 11h1v1h-1zM22 11h1v1h-1zM24 11h2v1h-2zM4 12h1v1h-1zM6 12h1v1h-1zM10 12h2v1h-2zM13 12h2v1h-2zM16 12h1v1h-1zM21 12h1v1h-1zM23 12h4v1h-4zM28 12h1v1h-1zM2 13h1v1h-1zM4 13h2v1h-2zM7 13h1v1h-1zM9 13h1v1h-1zM15 13h2v1h-2zM18 13h1v1h-1zM21 13h1v1h-1zM26 13h2v1h-2zM1 14h1v1h-1zM3 14h1v1h-1zM6 14h1v1h-1zM8 14h3v1h-3zM12 14h2v1h-2zM16 14h10v1h-10zM29 14h1v1h-1zM2 15h1v1h-1zM4 15h2v1h-2zM7 15h5v1h-5zM13 15h1v1h-1zM18 15h1v1h-1zM21 15h3v1h-3zM26 15h2v1h-2zM1 16h1v1h-1zM3 16h3v1h-3zM10 16h1v1h-1zM13 16h1v1h-1zM15 16h1v1h-1zM17 16h1v1h-1zM22 16h1v1h-1zM25 16h1v1h-1zM28 16h1v1h-1zM2 17h1v1h-1zM6 17h5v1h-5zM12 17h1v1h-1zM18 17h3v1h-3zM22 17h1v1h-1zM26 17h2v1h-2zM1 18h2v1h-2zM5 18h1v1h-1zM8 18h1v1h-1zM10 18h2v1h-2zM14 18h3v1h-3zM18 18h4v1h-4zM23 18h3v1h-3zM27 18h1v1h-1zM29 18h1v1h-1zM1 19h1v1h-1zM3 19h1v1h-1zM5 19h1v1h-1zM7 19h1v1h-1zM14 19h5v1h-5zM21 19h2v1h-2zM24 19h2v1h-2zM27 19h1v1h-1zM1 20h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM8 20h4v1h-4zM13 20h2v1h-2zM17 20h1v1h-1zM20 20h2v1h-2zM28 20h1v1h-1zM1 21h1v1h-1zM4 21h1v1h-1zM7 21h3v1h-3zM12 21h2v1h-2zM15 21h1v1h-1zM18 21h1v1h-1zM21 21h5v1h-5zM27 21h3v1h-3zM9 22h3v1h-3zM19 22h1v1h-1zM21 22h1v1h-1zM25 22h5v1h-5zM1 23h7v1h-7zM13 23h1v1h-1zM16 23h1v1h-1zM18 23h1v1h-1zM20 23h2v1h-2zM23 23h1v1h-1zM25 23h3v1h-3zM1 24h1v1h-1zM7 24h1v1h-1zM9 24h5v1h-5zM15 24h1v1h-1zM17 24h1v1h-1zM19 24h3v1h-3zM25 24h1v1h-1zM28 24h1v1h-1zM1 25h1v1h-1zM3 25h3v1h-3zM7 25h1v1h-1zM9 25h1v1h-1zM11 25h2v1h-2zM16 25h4v1h-4zM21 25h5v1h-5zM27 25h2v1h-2zM1 26h1v1h-1zM3 26h3v1h-3zM7 26h1v1h-1zM9 26h2v1h-2zM13 26h3v1h-3zM17 26h1v1h-1zM21 26h2v1h-2zM26 26h4v1h-4zM1 27h1v1h-1zM3 27h3v1h-3zM7 27h1v1h-1zM9 27h1v1h-1zM11 27h1v1h-1zM13 27h1v1h-1zM16 27h2v1h-2zM19 27h3v1h-3zM23 27h6v1h-6zM1 28h1v1h-1zM7 28h1v1h-1zM14 28h2v1h-2zM17 28h1v1h-1zM21 28h3v1h-3zM26 28h1v1h-1zM28 28h1v1h-1zM1 29h7v1h-7zM9 29h1v1h-1zM18 29h2v1h-2zM25 29h3v1h-3z"/></svg></div>
+        <div>
+          <p class="muted small">or type</p>
+          <p style="font-family:var(--mono);font-size:22px;font-weight:700">ribesh19.github.io/f1/v</p>
+          <p class="muted small" style="margin-top:10px">Each question appears on your phone by itself when we reach it. Nothing to install. No names.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="when">Warm-up question</p>
+      <h3 style="margin-bottom:14px">Have you used Power BI before?</h3>
+      <div class="live" data-live="warm"></div>
+      <p class="muted small nohost">Answer on your phone. The room's answers show on the big screen.</p>
+    </div>
+  </div>
+  <p class="notes">Wait here until the vote count stops climbing. Say: "Scan it once and leave it open. Every question I ask today will appear on your phone by itself." Read the room from the bars: if most say Never, slow down in the hands-on. Voting only runs from your own copy of this page: open it once with ?host on the end of the address and enter the PIN. If the bars stay empty, carry on: every later slide still works without votes.</p>
+</section>
+
+<!-- ============ PART 1 ============ -->
+<section class="slide part" data-part="1" data-title="Part 1: Why design matters">
+  <div class="txt">
+    <div class="num">1</div>
+    <h2>Why design matters</h2>
+    <p class="lede">The same numbers can be ignored or acted on. The difference is design.</p>
+    <p class="time">ABOUT 10 MINUTES</p>
+  </div>
+  <img src="assets/starter.jpg" alt="A plain Power BI report">
+</section>
+
+<section class="slide" data-title="Quick guess" id="guess" data-poll="guess">
+  <p class="kicker">Quick guess</p>
+  <h2>In the 1980s, how many F1 cars that started a race finished it?</h2>
+  <div class="two">
+    <div style="display:grid;gap:14px">
+      <p class="lede">Vote on your phone, or drag to your guess on your own screen.</p>
+      <output id="guessOut" for="guessIn" style="font-family:var(--serif);font-size:72px;line-height:1">70%</output>
+      <input type="range" id="guessIn" min="0" max="100" value="70" aria-label="Your guess, as a percentage">
+      <div class="row"><button class="btn red" id="guessGo" type="button">Lock it in</button><button class="btn ghost" id="guessNow" type="button" hidden>And today?</button></div>
+    </div>
+    <div class="demo" id="guessDemo" aria-live="polite"></div>
+  </div>
+  <div class="live h" data-live="guess"></div>
+  <p class="notes">The question is on their phones: give it ten seconds and watch the vote count. You make a guess too, out loud: "I would have said about 70." Then lock it in: that also reveals how the room voted, with the right band in red. No volunteer needed. Then press "And today?".</p>
+</section>
+
+<section class="slide" data-title="Same data, two reports">
+  <p class="kicker">Look first</p>
+  <h2>Same data. Same measures. Which one would you trust?</h2>
+  <div class="compare at-before" id="compare">
+    <img src="assets/starter.jpg" alt="Plain Power BI report with default colours, a table, a pie chart and a donut chart">
+    <img class="after" src="assets/finished-story.jpg" alt="Designed report with a headline, a photo, three key figures and three clear charts">
+    <span class="handle"></span><span class="tag l">Before</span><span class="tag r">After</span>
+  </div>
+  <input type="range" id="cut" min="0" max="100" value="100" aria-label="Slide to compare before and after">
+  <p class="lede">Drag the slider left. Not one number changes.</p>
+  <p class="notes">It opens on the plain report. Say: "This is what Power BI gives you." Then drag the slider slowly to the left to uncover the designed one. Say: "Same data, same built-in visuals. You will build it in half an hour."</p>
+</section>
+
+<section class="slide dark" data-title="The ten-second test" data-poll-dyn="find">
+  <p class="kicker">Try it</p>
+  <h2>You get ten seconds.</h2>
+  <p class="lede">Find the answer to one question: <b>how many F1 cars finish the race today?</b></p>
+  <div id="flash">
+    <img src="assets/finished-story.jpg" alt="A dashboard shown briefly for the ten-second test">
+    <span class="count" aria-hidden="true">10</span>
+    <div class="msg"><p style="max-width:none">Ten seconds on the clock. Look for the answer.</p></div>
+  </div>
+  <div class="row">
+    <button class="btn red" id="flashPlain" type="button">Show the plain one</button>
+    <button class="btn ghost" id="flashGo" type="button">Show the designed one</button>
+    <div class="live" data-live="find" style="flex:1;min-width:280px;max-width:460px"></div>
+  </div>
+  <p class="notes">Read the question out first so they know what to look for. They saw 88% two slides ago, and still will not find it on the plain report: that is the point. Run the plain one first, then the designed one: the slide gives the answer each time, so nobody has to speak. Each button also asks the phones "did you find it?", and the two bars beside the buttons fill in: the gap between them is the argument for design.</p>
+</section>
+
+<section class="slide dark" data-title="What is data storytelling?" id="trio">
+  <p class="kicker">The idea</p>
+  <h2>A data story needs three things.</h2>
+  <div class="two">
+    <svg viewBox="0 0 520 430" role="group" aria-label="Three overlapping circles: data, visuals and narrative">
+      <circle class="ring" data-k="data" cx="260" cy="150" r="120" tabindex="0" role="button" aria-label="Data"/>
+      <circle class="ring" data-k="visuals" cx="180" cy="280" r="120" tabindex="0" role="button" aria-label="Visuals"/>
+      <circle class="ring" data-k="narrative" cx="340" cy="280" r="120" tabindex="0" role="button" aria-label="Narrative"/>
+      <text x="260" y="95" text-anchor="middle">Data</text>
+      <text x="120" y="330" text-anchor="middle">Visuals</text>
+      <text x="400" y="330" text-anchor="middle">Narrative</text>
+    </svg>
+    <div>
+      <div class="row" id="trioChips" role="group" aria-label="Combine the elements"></div>
+      <div id="trioText" aria-live="polite" style="margin-top:18px"></div>
+      <p class="source" style="margin-top:14px">Model: Brent Dykes, <i>Effective Data Storytelling</i>.</p>
+    </div>
+  </div>
+  <p class="notes">You click, you narrate. Line to use: "Data plus visuals is the plain report you just saw: correct, and nobody cares." Narrative means a headline, an order, and a reason to care.</p>
+</section>
+
+<!-- ============ PART 2 ============ -->
+<section class="slide part" data-part="2" data-title="Part 2: Dashboard design">
+  <div class="txt">
+    <div class="num">2</div>
+    <h2>Dashboard design</h2>
+    <p class="lede">Audience, layout, clutter, colour and words. Five decisions before you add a single chart.</p>
+    <p class="time">ABOUT 18 MINUTES</p>
+  </div>
+  <img src="assets/finished-story.jpg" alt="A designed Power BI report page">
+</section>
+
+<section class="slide" data-title="Start with the audience">
+  <p class="kicker">Decision 1 · Audience</p>
+  <h2>Who is it for, and what will they do with it?</h2>
+  <div class="row" id="audChips" role="group" aria-label="Choose an audience"></div>
+  <div class="card" id="audOut" aria-live="polite"></div>
+  <p class="notes">Click through all four without stopping to ask. Line: "Same data, four different pages, because four different people are looking." Each example is a page in Gallery.pbix.</p>
+</section>
+
+<section class="slide dark" data-title="Layout and hierarchy">
+  <p class="kicker">Decision 2 · Layout</p>
+  <h2>Tell the eye where to go.</h2>
+  <div class="two">
+    <div>
+      <p class="lede">People read a page top-left to bottom-right. Put things in the order you want them understood.</p>
+      <div id="zoneText" aria-live="polite" style="margin-top:18px"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn red" id="zoneNext" type="button">Next area</button>
+        <button class="btn ghost" id="zoneAll" type="button">Show whole page</button>
+      </div>
+    </div>
+    <div class="spot" id="spot">
+      <img src="assets/finished-story.jpg" alt="The designed dashboard, used to point out the reading order">
+    </div>
+  </div>
+  <p class="notes">Step through the five areas. Size and position do the work: the biggest text is the finding, the numbers that prove it come next, detail sits at the bottom.</p>
+</section>
+
+<section class="slide" data-title="Remove the clutter">
+  <p class="kicker">Decision 3 · Clutter</p>
+  <h2>Take things away until it is clear.</h2>
+  <div class="two">
+    <div>
+      <ul class="ticks" id="clutterList"></ul>
+      <div class="row" style="margin-top:18px">
+        <button class="btn red" id="clutterNext" type="button">Remove one thing</button>
+        <button class="btn ghost" id="clutterReset" type="button">Start again</button>
+      </div>
+      <p class="source" style="margin-top:14px">Idea: "Data looks better naked", Darkhorse Analytics.</p>
+    </div>
+    <div class="demo" id="clutterDemo" aria-live="polite"></div>
+  </div>
+  <p class="notes">The button tells you what goes next, so read it out and click. Line: "Everything that is not data has to earn its place." Slow down on the last click: the title becomes the finding.</p>
+</section>
+
+<section class="slide dark" data-title="Colour with a purpose">
+  <p class="kicker">Decision 4 · Colour</p>
+  <h2>Colour is a signal, so use it once.</h2>
+  <div class="two">
+    <div>
+      <div class="row" id="colourChips" role="group" aria-label="Colour approach"></div>
+      <p id="colourText" class="lede" style="margin-top:16px;min-height:96px" aria-live="polite"></p>
+      <ul class="ticks" style="margin-top:6px">
+        <li class="done">Grey for context, one colour for the point.</li>
+        <li class="done">Same meaning, same colour, on every page.</li>
+        <li class="done">Never rely on red against green alone.</li>
+      </ul>
+    </div>
+    <div class="demo" id="colourDemo"></div>
+  </div>
+  <p class="notes">About one in twelve men has some colour vision deficiency, so red against green can vanish. One accent colour also survives a black-and-white printout.</p>
+</section>
+
+<section class="slide" data-title="Words are part of the design">
+  <p class="kicker">Decision 5 · Words</p>
+  <h2>A title should say what you found.</h2>
+  <div class="two">
+    <div>
+      <div class="row" id="titleChips" role="group" aria-label="Title style"></div>
+      <p id="titleText" class="lede" style="margin-top:16px;min-height:120px" aria-live="polite"></p>
+      <p class="source">Idea: Cole Nussbaumer Knaflic, <i>Storytelling with Data</i>.</p>
+    </div>
+    <div class="demo" id="titleDemo"></div>
+  </div>
+  <p class="notes">Same chart, three titles. Power BI's default title is a label ("Finish Rate by Season"). A headline tells the reader what to look for before they look.</p>
+</section>
+
+<section class="slide dark" data-title="Seven checks">
+  <p class="kicker">Before you publish</p>
+  <h2>Seven checks for any dashboard.</h2>
+  <ol class="check">
+    <li><label><input type="checkbox"> <span><b>One finding.</b> Can you say it in a sentence?</span></label></li>
+    <li><label><input type="checkbox"> <span><b>Ten seconds.</b> Does a stranger get it at a glance?</span></label></li>
+    <li><label><input type="checkbox"> <span><b>Reading order.</b> Biggest and top-left is the most important.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>Nothing spare.</b> Every line, border and label earns its place.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>One accent.</b> Colour points at the thing that matters.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>Aligned.</b> Edges line up; gaps are equal.</span></label></li>
+    <li><label><input type="checkbox"> <span><b>Honest.</b> Axes start where they should; sources are one click away.</span></label></li>
+  </ol>
+  <p class="lede" id="score" aria-live="polite">Tick them for your own report later. Score: 0 of 7.</p>
+  <p class="notes">Tick the boxes yourself for the finished report as you read them. The same list is on their screens to score their own work later. Nobody reports a score out loud.</p>
+</section>
+
+<!-- ============ PART 3 ============ -->
+<section class="slide part" data-part="3" data-title="Part 3: Choosing the visual">
+  <div class="txt">
+    <div class="num">3</div>
+    <h2>Choosing the visual</h2>
+    <p class="lede">You know the chart types. This is about picking one on purpose.</p>
+    <p class="time">ABOUT 12 MINUTES</p>
+  </div>
+  <img src="assets/lap-2.jpg" alt="A Power BI page with a line chart and column charts">
+</section>
+
+<section class="slide" data-title="Start from the question">
+  <p class="kicker">A rule of thumb</p>
+  <h2>Ask what you want to show. The chart follows.</h2>
+  <div class="row" id="intents" role="group" aria-label="What do you want to show?"></div>
+  <div class="card" id="advice" aria-live="polite"></div>
+  <p class="notes">Go through all six quickly. The order of the decision is the lesson: question first, chart second. Most bad charts come from picking the chart first.</p>
+</section>
+
+<section class="slide" data-title="Vote: pick the chart" data-poll-dyn="chart">
+  <p class="kicker" id="voteStep">Pick the chart</p>
+  <h2 id="voteQ">Who has won the most races?</h2>
+  <div class="vote">
+    <div class="clinic" id="clinic"></div>
+    <div class="side">
+      <p class="lede">Six charts, identical numbers. Vote on your phone, or click one on your screen.</p>
+      <button class="btn red" id="think" type="button">Three seconds to decide</button>
+      <button class="btn ghost" id="reveal" type="button">Show the verdicts</button>
+      <button class="btn ghost" id="voteNext" type="button">Next question</button>
+      <span class="muted small" id="voteNote"></span>
+    </div>
+  </div>
+  <p class="notes">Press "Three seconds to decide": the countdown fills the silence and then reveals the answers by itself. The six options are on their phones for each question, and the vote count shows beside the buttons; the split appears on the charts with the verdicts. Say your own pick while it runs: "I would go A." Then press "Next question": there are three, and the best chart is different each time (bar, then line, then table). That is the lesson: the question picks the chart. The first one is also the Chart Clinic tab in Finished.pbix.</p>
+</section>
+
+<section class="slide dark" data-title="Three traps">
+  <p class="kicker">Watch for</p>
+  <h2>Three ways a chart misleads.</h2>
+  <div class="two">
+    <div style="display:grid;gap:16px">
+      <div class="trap"><b>The cut-off axis</b><span class="muted">Starting a bar chart above zero makes small gaps look huge.</span></div>
+      <div class="trap"><b>Too many slices</b><span class="muted">Past three or four, nobody can compare angles. Use bars.</span></div>
+      <div class="trap"><b>Two axes</b><span class="muted">Two scales on one chart let you draw any relationship you like.</span></div>
+      <div class="row" id="axisChips" role="group" aria-label="Axis start"></div>
+    </div>
+    <div class="demo" id="axisDemo" aria-live="polite"></div>
+  </div>
+  <p class="notes">Toggle the axis. Same two numbers: 83% and 88%. With the axis cut at 80 the 2020s look more than twice as reliable. Bars must start at zero; lines can sometimes start higher if you say so.</p>
+</section>
+
+<!-- ============ PART 4 ============ -->
+<section class="slide part" data-part="4" data-title="Part 4: Dashboards I have designed">
+  <div class="txt">
+    <div class="num">4</div>
+    <h2>Dashboards I have designed</h2>
+    <p class="lede">Real examples, and what each one taught me.</p>
+    <p class="time">ABOUT 10 MINUTES</p>
+  </div>
+  <img src="assets/gallery-1-editorial.jpg" alt="An editorial style Power BI dashboard">
+</section>
+
+<section class="slide" data-title="From my own work" id="workSlide">
+  <p class="kicker">From my own work</p>
+  <h2>What I built, and what I learned.</h2>
+  <div class="gallery" id="work"></div>
+  <p class="lede" id="workEmpty">I will show these live.</p>
+  <p class="notes">Your screenshots appear here when you add them to assets/my-work as 01.jpg to 06.jpg. For each: who it was for, the one decision that mattered, what you would change now. If the folder is empty, switch to Power BI and show the reports directly.</p>
+</section>
+
+<section class="slide dark" data-title="One story, five looks">
+  <p class="kicker">Designed for today</p>
+  <h2>One story. Five looks.</h2>
+  <div class="gallery" id="gallery"></div>
+  <p class="notes">All five are on screen together, so compare by pointing, not clicking. Say who each is for: Poster for an executive, Timing Sheet for an analyst, Night Race for a wall screen. Click one only if you want it full size.</p>
+</section>
+
+<!-- ============ PART 5 ============ -->
+<section class="slide part" data-part="5" data-title="Part 5: Your turn">
+  <div class="txt">
+    <div class="num">5</div>
+    <h2>Your turn</h2>
+    <p class="lede">Two things open: <code>powerbi/Starter.pbix</code> to work in, and <a href="workbook.html" style="color:inherit"><code>workbook.html</code></a> for the clicks. This screen shows the goal and the clock.</p>
+    <p class="small" style="margin-top:10px;color:#b9b4a7">No files yet? Go to <span style="font-family:var(--mono)">ribesh19.github.io/f1</span>, download the zip and unzip it.</p>
+    <p class="time">FIVE LAPS · ABOUT 40 MINUTES</p>
+  </div>
+  <img src="assets/finished-race.jpg" alt="The finished race page: an animated chart of drivers' career wins">
+</section>
+
+<section class="slide dark lapslide" data-title="Lap 1: the look">
+  <p class="kicker">Lap 1 · Look</p>
+  <h2>Two files. Whole new look.</h2>
+  <div class="laprow">
+    <figure class="was"><img src="assets/starter.jpg" alt="The plain starter page"><span class="tag">Before</span></figure>
+    <span class="arrow"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    <figure class="now"><img src="assets/lap-1.jpg" alt="The same page with the theme and background applied"><span class="tag">After lap 1</span></figure>
+  </div>
+  <div class="lapinfo">
+    <div><h3>The idea</h3><p>A theme sets every colour and font at once. A background image carries the layout. Nothing is formatted by hand.</p></div>
+    <div><h3>You are done when</h3><ul><li>The dark rail and the photo sit behind <b>The story</b>, <b>Drivers</b> and <b>The race</b>.</li><li>The decade list on Drivers has turned into a row of tiles.</li></ul></div>
+    <div><div class="timer" data-minutes="5" data-name="lap 1"></div>
+      <p class="small" style="margin-top:8px">Clicks: <a href="workbook.html#lap1" style="color:inherit;font-weight:600">workbook, lap 1</a><br>Not there when the clock ends? Open <code>powerbi/Lap-1.pbix</code>.</p></div>
+  </div>
+  <p class="notes">Demo path: Design tab, Import theme, pole-position-theme.json. Then click empty canvas, Visualizations, Format page, Canvas background, Browse, main.png, Image fit Fit, Transparency 0. Repeat on Drivers and The race. Point out that the same table, pie and donut are still there: the look changed, the charts did not. Older Desktop versions keep the theme under View, Themes, Browse for themes.</p>
+</section>
+
+<section class="slide lapslide" data-title="Lap 2: the right chart">
+  <p class="kicker">Lap 2 · Charts</p>
+  <h2>Swap three charts.</h2>
+  <div class="laprow">
+    <figure class="was"><img src="assets/lap-1.jpg" alt="The page with a table, a pie and a donut"><span class="tag">Before</span></figure>
+    <span class="arrow"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    <figure class="now"><img src="assets/lap-2.jpg" alt="The page with a line chart and two column charts"><i class="hl" style="left:17.6%;top:48.3%;width:81.1%;height:49.2%"></i><span class="tag">After lap 2</span></figure>
+  </div>
+  <div class="lapinfo">
+    <div><h3>The idea</h3><p>Start from the question. Change over time is a line. A rate is not a slice of a whole, so it never goes in a pie.</p></div>
+    <div><h3>You are done when</h3><ul><li>One red line that dips, then climbs to nine in ten.</li><li>Decades run left to right on both column charts.</li><li>Each chart has a title that says what to look for.</li></ul></div>
+    <div><div class="timer" data-minutes="8" data-name="lap 2"></div>
+      <p class="small" style="margin-top:8px">Clicks: <a href="workbook.html#lap2" style="color:inherit;font-weight:600">workbook, lap 2</a><br>Not there when the clock ends? Open <code>powerbi/Lap-2.pbix</code>.</p></div>
+  </div>
+  <p class="notes">Demo path: table to Line chart, remove Race Starts and Wins From Pole % from Y-axis, Y-axis Range 0 to 1. Pie to Clustered column chart, add Accident Rate. Donut to Clustered column chart, Data labels on. Both: More options, Sort axis, Decade, then Sort ascending. Two things catch people out, so say them aloud: the converted line chart carries three fields, and column charts sort by size until you sort the axis.</p>
+</section>
+
+<section class="slide dark lapslide" data-title="Lap 3: words and numbers">
+  <p class="kicker">Lap 3 · Words and numbers</p>
+  <h2>A headline and three numbers.</h2>
+  <div class="laprow">
+    <figure class="was"><img src="assets/lap-2.jpg" alt="The page titled F1 Dashboard with three totals"><span class="tag">Before</span></figure>
+    <span class="arrow"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    <figure class="now"><img src="assets/lap-3.jpg" alt="The page with a headline, three story numbers and one red column"><i class="hl" style="left:17.6%;top:1.8%;width:46%;height:13%"></i><i class="hl" style="left:50.2%;top:17.2%;width:48.5%;height:30%"></i><i class="hl" style="left:76%;top:48.3%;width:22.7%;height:49.2%"></i><span class="tag">After lap 3</span></figure>
+  </div>
+  <div class="lapinfo">
+    <div><h3>The idea</h3><p>A title names a topic. A headline states the finding. One filter turns a total into a number with a point.</p></div>
+    <div><h3>You are done when</h3><ul><li>The headline says what happened, not what the page is about.</li><li>The cards read 48%, 88% and 55%.</li><li>One number is red, and one column: the 2020s.</li></ul></div>
+    <div><div class="timer" data-minutes="9" data-name="lap 3"></div>
+      <p class="small" style="margin-top:8px">Clicks: <a href="workbook.html#lap3" style="color:inherit;font-weight:600">workbook, lap 3</a><br>Not there when the clock ends? Open <code>powerbi/Lap-3.pbix</code>.</p></div>
+  </div>
+  <p class="notes">Demo path: double-click the title and type the finding. First card: Finish Rate in, Race Starts out; Filters pane, drag Decade to Filters on this visual, tick 1980s; right-click the field, Rename for this visual. Same for 2020s, then Callout value colour red. Third card: Season Dominance %, 2020s. Last, The champion wins more chart: Columns, Color, fx, Field value, Decade Colour. The filter is the lesson: 64 percent over 76 seasons is true and useless; 48 then and 88 now is a story.</p>
+</section>
+
+<section class="slide lapslide" data-title="Lap 4: colour and titles">
+  <p class="kicker">Lap 4 · Colour and titles</p>
+  <h2>Colour and a title that react.</h2>
+  <div class="laprow">
+    <figure class="was"><img src="assets/lap-1-drivers.jpg" alt="The Drivers page with every bar red and a default title"><span class="tag">Before</span></figure>
+    <span class="arrow"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    <figure class="now"><img src="assets/lap-4.jpg" alt="The Drivers page with one red bar and a title naming the leader"><i class="hl" style="left:17.6%;top:26.1%;width:46.3%;height:71.2%"></i><span class="tag">After lap 4</span></figure>
+  </div>
+  <div class="lapinfo">
+    <div><h3>The idea</h3><p>Grey for context, one colour for the point. A measure decides, so it is still right after the reader clicks.</p></div>
+    <div><h3>You are done when</h3><ul><li>One red bar on Drivers: the leader.</li><li>The chart title is a sentence naming the leader.</li><li>Click <b>1990s</b>: bars, colour and title switch to Michael Schumacher.</li></ul></div>
+    <div><div class="timer" data-minutes="5" data-name="lap 4"></div>
+      <p class="small" style="margin-top:8px">Clicks: <a href="workbook.html#lap4" style="color:inherit;font-weight:600">workbook, lap 4</a><br>Not there when the clock ends? Open <code>powerbi/Lap-4.pbix</code>.</p></div>
+  </div>
+  <p class="notes">Demo path: Drivers bar chart: Bars (a bar chart says Bars, a column chart says Columns), Color, fx, Field value, Bar Colour. General, Title, fx beside Text, Title Text. Demo the decade click twice: it is the moment people react. Nobody coloured a bar by hand.</p>
+</section>
+
+<section class="slide dark lapslide" data-title="Lap 5: hover and play">
+  <p class="kicker">Lap 5 · Motion</p>
+  <h2>Build a tooltip. Then press play.</h2>
+  <div class="laprow">
+    <figure class="was"><img src="assets/lap-1-race.jpg" alt="The race page with an empty chart waiting for fields"><span class="tag">Before</span></figure>
+    <span class="arrow"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    <figure class="now"><img src="assets/lap-5.jpg" alt="The race page with an animated scatter chart"><i class="hl" style="left:17.6%;top:17.2%;width:57.6%;height:80%"></i><span class="tag">After lap 5</span></figure>
+  </div>
+  <div class="lapinfo">
+    <div><h3>The idea</h3><p>Detail belongs one step away. A tooltip is a small report page you build yourself. A play axis turns 76 seasons into twenty seconds.</p></div>
+    <div><h3>You are done when</h3><ul><li>Hovering a bar on Drivers shows the tooltip page you built.</li><li>The race chart has named dots and a Play button.</li><li>The red dot changes hands as it plays.</li></ul></div>
+    <div><div class="timer" data-minutes="12" data-name="lap 5"></div>
+      <p class="small" style="margin-top:8px">Clicks: <a href="workbook.html#lap5" style="color:inherit;font-weight:600">workbook, lap 5</a><br>Finished? Compare with <code>powerbi/Finished.pbix</code>.</p></div>
+  </div>
+  <p class="notes">Demo path, tooltip: New page; Format page, Page information, Name Driver tooltip, Allow use as tooltip on (the page shrinks to 400 x 300). Clustered column chart, Season to X-axis, Wins to Y-axis, stretch to fit. Columns, Color, fx, Wins By Season Colour. Title fx, Tooltip Headline. Hide the page. Drivers bar chart, General, Tooltips, Options, Type Report page, Page Driver tooltip. Hover Hamilton: red columns are his title years. Anyone stuck can choose the ready-made Backup tooltip page in the Page list instead. If time is short, skip the tooltip and go straight to the race. The race: click the empty chart; Driver to Values, Starts To Date to X Axis, Wins To Date to Y Axis, Season to Play Axis; Category label on; Markers, Color, fx, Race Colour. Play it on the projector once everyone has it running: Fangio, Clark, Stewart, Prost, Schumacher, Hamilton. Click a dot and play again to trace one career.</p>
+</section>
+
+<section class="slide" data-title="Extra laps">
+  <div class="two">
+    <div>
+      <p class="kicker">Extra laps · After today</p>
+      <h2>Two more, in your own time.</h2>
+      <div class="cols" style="margin-top:18px;grid-template-columns:1fr 1fr">
+        <div><h3>Lap 6: drill-through</h3><p class="muted small">Right-click any driver, on any chart, to open a full page about them. The page is built already: one field switches it on.</p></div>
+        <div><h3>Lap 7: bookmarks</h3><p class="muted small">Two bookmarks and two buttons make a note that opens and closes over the charts.</p></div>
+      </div>
+      <p class="muted small" style="margin-top:18px">Both are in the <a href="workbook.html#lap6" style="color:inherit;font-weight:600">workbook</a>, with every click. About 15 minutes together.</p>
+    </div>
+    <img class="shot" src="assets/finished-profile.jpg" alt="The Driver profile page for Lewis Hamilton, reached by drill-through">
+  </div>
+  <p class="notes">Show the finished file for thirty seconds: right-click Hamilton, drill through, Back. Then the How to read this button. Do not build them live.</p>
+</section>
+
+<section class="slide dark adv" data-title="Tooltips and bookmarks: why">
+  <p class="kicker">Going further · What you just built</p>
+  <h2>Two ways to keep detail off the page.</h2>
+  <div class="cols">
+    <div class="card"><p class="when">Report page tooltip</p><h3>More about one mark</h3><p>A small page that appears on hover, filtered to whatever is under the mouse.</p><p class="muted small" style="margin-top:8px">Today: hover a driver, see their wins season by season.</p></div>
+    <div class="card"><p class="when">Bookmark</p><h3>Another state of the same page</h3><p>A saved view that a button brings back: a note that opens, a second chart, a reset.</p><p class="muted small" style="margin-top:8px">Today: the How to read this button in the extra laps.</p></div>
+    <div class="card"><p class="when">Why bother</p><h3>The page stays readable</h3><p>"Can you also show..." no longer means one more chart. It goes one step away, where only the people who want it look.</p></div>
+  </div>
+  <p class="rule"><b>Rule of thumb.</b> One mark, more detail: tooltip. Same page, different view: bookmark. A whole page about one thing: drill-through.</p>
+  <p class="notes">One minute. Tie it back to Part 2, Remove the clutter: these two features are how you say yes to a request without adding to the page. If time is short, show this slide and the Data tick slide, and skip the other three.</p>
+</section>
+
+<section class="slide adv" data-title="How a tooltip page works">
+  <div class="two">
+    <div>
+      <p class="kicker">Report page tooltips</p>
+      <h2>Hovering sends a filter.</h2>
+      <div class="cols" style="grid-template-columns:1fr;gap:12px;margin-top:16px">
+        <div class="fact"><b>It is an ordinary page</b><span class="muted">Small, usually hidden, with Allow use as tooltip switched on. Anything a page can hold, it can hold.</span></div>
+        <div class="fact"><b>The mark becomes the filter</b><span class="muted">Hover Lewis Hamilton and the page is filtered to him. Charts, cards and title measures all recalculate.</span></div>
+        <div class="fact"><b>Automatic or by hand</b><span class="muted">Put a field in Tooltip fields and every visual using that field shows it. Or choose the page on one visual.</span></div>
+        <div class="fact"><b>Know the limits</b><span class="muted">Readers cannot click or scroll inside a tooltip. One idea, one small page.</span></div>
+      </div>
+    </div>
+    <img class="shot" style="aspect-ratio:4/3;max-width:460px;justify-self:center" src="assets/lap-5-tooltip.jpg" alt="A tooltip page filtered to Lewis Hamilton: 105 wins from 380 starts, one column per season, red in title years">
+  </div>
+  <p class="notes">One minute. Hover Hamilton in the finished file while this is up. The point to land: nobody wrote "show Hamilton" anywhere. The hover passed the driver in as a filter and the measures did the rest. Sizes Power BI offers: 320 by 240, 400 by 300, 600 by 450.</p>
+</section>
+
+<section class="slide dark adv" data-title="What a bookmark remembers">
+  <p class="kicker">Bookmarks</p>
+  <h2>What a bookmark remembers.</h2>
+  <div class="cols">
+    <div class="card"><p class="when">Data</p><h3>What is filtered</h3><ul><li>Filters</li><li>Slicers: their type and what is picked</li><li>Cross-highlighting</li><li>Sort order</li><li>Drill location</li></ul></div>
+    <div class="card"><p class="when">Display</p><h3>What is showing</h3><ul><li>Which objects are visible or hidden</li><li>Spotlight on a visual</li></ul></div>
+    <div class="card"><p class="when">Current page</p><h3>Where you were</h3><p>The page that was open, so a bookmark can also take the reader there.</p></div>
+  </div>
+  <p class="rule"><b>Not remembered:</b> the numbers themselves, or where a visual sits. Each of the three parts can be switched off per bookmark, under More options. <b>Selected visuals</b> limits a bookmark to the visuals you had selected.</p>
+  <p class="notes">One minute. A bookmark is a saved state, not a saved picture. Open the Bookmarks pane, click the three dots on a bookmark and show the ticks: Data, Display, Current page, All visuals, Selected visuals.</p>
+</section>
+
+<section class="slide adv" data-title="Bookmarks and the reader's filters">
+  <p class="kicker">Bookmarks · The part that catches people out</p>
+  <h2>Do the reader's filters survive? One tick decides.</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr">
+    <div class="card"><p class="when">Data ticked</p><h3>The bookmark replaces their filters</h3><p>The saved filters and slicers overwrite whatever the reader had picked.</p><p class="muted small" style="margin-top:8px">Use for a guided story or a Reset button.</p></div>
+    <div class="card"><p class="when">Data unticked</p><h3>Their filters carry through</h3><p>Only what is visible changes. Slicers and filters stay exactly as the reader left them.</p><p class="muted small" style="margin-top:8px">Use for opening a note or swapping one chart for another.</p></div>
+  </div>
+  <div class="eg">
+    <span>A reader picks <b>1990s</b>, then clicks <b>How to read this</b>.</span>
+    <span class="muted">Data ticked: the page jumps back to every decade, and their choice is gone.</span>
+    <span class="muted">Data unticked: still 1990s, with the note open. That is why lap 7 unticks Data.</span>
+  </div>
+  <p class="muted small">Worth knowing: a hidden slicer still filters the page.</p>
+  <p class="notes">Ninety seconds. This is the technical point most people meet as a bug: "my help button resets everything". Demo it if the finished file is open: pick 1990s on Drivers, then show what a bookmark with Data ticked would do. The fix is one tick.</p>
+</section>
+
+<section class="slide dark adv" data-title="Keeping bookmarks working">
+  <p class="kicker">Bookmarks · Looking after them</p>
+  <h2>Refresh is safe. Edits need Update.</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:16px 24px">
+    <div class="card"><p class="when">After a data refresh</p><h3>Nothing to do</h3><p>A bookmark stores settings, not numbers. It shows the new data through the same saved filters.</p></div>
+    <div class="card"><p class="when">After you change the page</p><h3>Update it</h3><p>Bookmarks never update themselves. Set the page how it should look, then More options, Update.</p></div>
+    <div class="card"><p class="when">After you add a slicer</p><h3>Check every bookmark</h3><p>Old bookmarks do not know it exists, so they clear it when they run. Decide its state, then Update.</p></div>
+    <div class="card"><p class="when">After you move things</p><h3>Nothing breaks</h3><p>Position and size are not part of a bookmark. Nothing snaps back, and nothing needs updating.</p></div>
+  </div>
+  <p class="rule"><b>Test as a reader.</b> Hold Ctrl and click a button in Desktop, or press View in the Bookmarks pane to play them in order.</p>
+  <p class="notes">One minute. The habit to pass on: after any change to a page that has bookmarks, click through each bookmark once. In the Power BI service readers can also save personal bookmarks of their own.</p>
+</section>
+
+<section class="slide" data-title="Make your own background">
+  <p class="kicker">Behind the look</p>
+  <h2>The layout is just a picture.</h2>
+  <div class="two">
+    <div>
+      <p class="lede">Panels, rail, photo and icons are one image. Every number on top is still live Power BI.</p>
+      <div class="cols" style="margin-top:18px;grid-template-columns:1fr 1fr">
+        <div><h3>PowerPoint</h3><p class="muted small">Open <code>design/Backgrounds.pptx</code>. Move the shapes. Export the slide as PNG.</p></div>
+        <div><h3>Figma</h3><p class="muted small">Drag a <code>.svg</code> from <code>design/backgrounds</code> into Figma. Edit. Export as PNG.</p></div>
+      </div>
+      <div class="row" style="margin-top:18px">
+        <button class="btn" id="swapBtn" type="button" aria-pressed="false">Put the visuals on top</button>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <img src="design/backgrounds/main.png" alt="The background image on its own: a dark rail, a photo panel and empty white panels">
+      <img class="top" src="assets/finished-story.jpg" alt="The same layout with Power BI visuals placed in the panels">
+    </div>
+  </div>
+  <p class="notes">Open the PowerPoint file and drag one panel to show how little is involved. Slide size 13.333 by 7.5 inches equals 1280 by 720, the default Power BI page.</p>
+</section>
+
+<!-- ============ CLOSE ============ -->
+<section class="slide dark" data-title="What you used today" data-poll="steal">
+  <p class="kicker">Recap</p>
+  <h2>Eight things worth stealing.</h2>
+  <div class="live" data-live="steal" data-headonly style="max-width:520px"></div>
+  <div class="cols">
+    <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="16" cy="16.5" r="2.5"/></svg><div><b>Theme files<em class="fv" data-key="theme"></em></b><span>One file sets colour, type and defaults for every visual.</span></div></div>
+    <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/></svg><div><b>Canvas backgrounds<em class="fv" data-key="background"></em></b><span>Draw the layout once in PowerPoint or Figma.</span></div></div>
+    <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><div><b>Bookmarks<em class="fv" data-key="bookmark"></em></b><span>Save a state of the page and jump to it with a button.</span></div></div>
+    <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><div><b>Report page tooltips<em class="fv" data-key="tooltip"></em></b><span>A small page that appears when you hover.</span></div></div>
+    <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h13"/></svg><div><b>Dynamic titles<em class="fv" data-key="title"></em></b><span>A measure writes the headline for the current selection.</span></div></div>
+    <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><div><b>Colour by measure<em class="fv" data-key="colour"></em></b><span>Grey for context, one colour for the point you are making.</span></div></div>
+    <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg><div><b>Play axis<em class="fv" data-key="play"></em></b><span>Four fields on a scatter chart and time starts moving.</span></div></div>
+    <div class="feature"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><div><b>Drill-through<em class="fv" data-key="drill"></em></b><span>Right-click any driver to open a page about them.</span></div></div>
+  </div>
+  <p class="notes">Their phones ask which one they will use first; the counts appear in red beside each name. None of these needs a custom visual, admin rights or the Power BI Service. All have exact clicks in the workbook.</p>
+</section>
+
+<section class="slide adv" data-title="Where to look next">
+  <p class="kicker">Keep looking</p>
+  <h2>Two galleries worth an hour.</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr">
+    <a class="card" href="https://community.fabric.microsoft.com/category/pbi_comm_galleries/discussions/datastoriesgallery" target="_blank" rel="noopener"><p class="when">For inspiration</p><h3>Data Stories Gallery</h3><p>Reports shared by the Power BI community. Open a few and ask what you would steal: the layout, the titles, the one colour.</p><span class="url">community.fabric.microsoft.com · Data Stories Gallery</span></a>
+    <a class="card" href="https://community.fabric.microsoft.com/category/pbi_comm_galleries/discussions/themesgallery" target="_blank" rel="noopener"><p class="when">For themes</p><h3>Themes Gallery</h3><p>Theme files other people have shared. Download one and import it exactly as in lap 1: Design, Import theme.</p><span class="url">community.fabric.microsoft.com · Themes Gallery</span></a>
+  </div>
+  <p class="muted small">Both are on the Microsoft Fabric community site. Borrow the ideas, then make the report your own.</p>
+  <p class="notes">Thirty seconds. Open the Data Stories Gallery in a browser tab and scroll once. Say: "When you are stuck for a layout, start here. When you want a different look in one click, the Themes Gallery."</p>
+</section>
+
+<section class="slide" data-title="In the real world">
+  <p class="kicker">From industry</p>
+  <h2>What happens to a dashboard at work.</h2>
+  <div class="cols">
+    <div class="card"><h3>It gets ten seconds</h3><p class="small" style="margin-top:8px">Most reports are opened on the way to something else. If the finding is not in the title, it is not found.</p></div>
+    <div class="card"><h3>It gets questioned</h3><p class="small" style="margin-top:8px">"Where is that number from?" Keep definitions and sources one click away. Trust is a design feature.</p></div>
+    <div class="card"><h3>It gets reused</h3><p class="small" style="margin-top:8px">A theme and a background become a template. The second report takes a fraction of the time.</p></div>
+    <div class="card"><h3>It gets judged on looks</h3><p class="small" style="margin-top:8px">Fair or not, a careful-looking report is assumed to have careful numbers. Use that.</p></div>
+  </div>
+  <p class="notes">Three minutes. One short story of your own per card. No questions to the room.</p>
+</section>
+
+<section class="slide" data-title="Questions people ask" id="faq">
+  <p class="kicker">Before you ask</p>
+  <h2>Four questions I usually get.</h2>
+  <div class="faq">
+    <details><summary>Do I need to be good at design?</summary><p>No. A theme file, a background and one accent colour do most of the work. The rest is deleting things.</p></details>
+    <details><summary>Did any of this need a custom visual?</summary><p>None of it. Everything today is built into Power BI Desktop, which is why it opens on any machine.</p></details>
+    <details><summary>Where do the backgrounds come from?</summary><p>PowerPoint or Figma. Draw rectangles on a 1280 by 720 page, export a PNG, set it as the canvas background.</p></details>
+    <details><summary>What should I learn next?</summary><p>Measures that return text and colours, then bookmarks. After that, data modelling: a clean model makes every report easier.</p></details>
+  </div>
+  <p class="notes">Your safety net. If nobody asks anything, say "these are the ones I normally get" and open two or three. If someone does ask, skip this slide.</p>
+</section>
+
+<section class="slide dark" data-title="Take it with you">
+  <p class="kicker">Keep going</p>
+  <h2>Take the files. Change the story.</h2>
+  <p class="lede">Same data, new question: who dominates, which decade was most dangerous, which driver gained the most places?</p>
+  <div class="row links" style="gap:26px;font-size:19px">
+    <a href="https://github.com/Ribesh19/f1">Repository</a>
+    <a href="workbook.html">Workbook</a>
+    <a href="https://github.com/Ribesh19/f1/blob/main/guides/backgrounds.md">Backgrounds</a>
+    <a href="https://github.com/Ribesh19/f1/blob/main/guides/measures.dax">Measures</a>
+    <a href="https://github.com/Ribesh19/f1/blob/main/SOURCES.md">Sources and credits</a>
+  </div>
+  <p class="source">Further reading: Cole Nussbaumer Knaflic, <i>Storytelling with Data</i>. Brent Dykes, <i>Effective Data Storytelling</i>. DataCamp, Data Storytelling and Communication cheat sheet.</p>
+  <div class="row" style="gap:28px;margin-top:14px;justify-content:space-between">
+    <div><h2 style="color:var(--red)">Questions, now or later.</h2><p class="links" style="margin-top:8px">Ribesh Maharjan · <a href="https://www.linkedin.com/in/ribesh-maharjan/">linkedin.com/in/ribesh-maharjan</a></p></div>
+    <img class="uni" src="assets/bcu-white.png" alt="Birmingham City University">
+  </div>
+  <p class="notes">Say: "Ask now, catch me afterwards, or message me on LinkedIn." Then start packing up slowly; that takes the pressure off the room. Leave this slide up.</p>
+</section>
+
+</main>
+<footer>Unofficial teaching pack by Ribesh Maharjan. Data: F1DB, CC BY 4.0. Photographs: Wikimedia Commons contributors, CC BY-SA. Not associated with Formula 1, the FIA or any team.</footer>
+
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image">
+  <button class="btn" type="button" id="lightboxClose">Close</button>
+  <div><img src="assets/gallery-2-paddock.jpg" alt=""><p></p></div>
+</div>
+
+<script src="vote.js"></script>
+<script>
+(function () {
+  const ppSync = () => document.dispatchEvent(new Event('pp:sync'));
+  let flashPoll = null;
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const el = (tag, props = {}, html) => { const n = Object.assign(document.createElement(tag), props); if (html !== undefined) n.innerHTML = html; return n; };
+  const slides = $$('.slide');
+  const INK = '#15151a', RED = '#e10600', GREY = '#b9b4a7', MUT = '#6b675e', LINE = '#dcd7cb';
+  const PAL = [RED, INK, '#8a8578', GREY, '#5b6770', '#c9a227', '#a76fa0', '#4f93b8', '#e59a6f', '#6fc2b8', '#3f7f5f'];
+
+  /* Your own dashboards: add screenshots to assets/my-work and describe them here. */
+  const myWork = [
+    { file: '01.jpg', title: 'Dashboard one', note: 'Who it was for and the decision that mattered.' },
+    { file: '02.jpg', title: 'Dashboard two', note: 'Who it was for and the decision that mattered.' },
+    { file: '03.jpg', title: 'Dashboard three', note: 'Who it was for and the decision that mattered.' },
+    { file: '04.jpg', title: 'Dashboard four', note: 'Who it was for and the decision that mattered.' },
+    { file: '05.jpg', title: 'Dashboard five', note: 'Who it was for and the decision that mattered.' },
+    { file: '06.jpg', title: 'Dashboard six', note: 'Who it was for and the decision that mattered.' },
+  ];
+
+  /* ---- chips helper ---- */
+  function chips(host, labels, onPick, first = 0) {
+    labels.forEach((label, i) => {
+      const c = el('button', { type: 'button', className: 'chip', textContent: label });
+      c.setAttribute('aria-pressed', 'false');
+      c.onclick = () => { $$('.chip', host).forEach(x => x.setAttribute('aria-pressed', x === c)); onPick(i); };
+      host.appendChild(c);
+    });
+    if (first !== null) host.children[first].click();
+  }
+
+  /* ---- navigation, progress, notes, clock ---- */
+  const dots = $('#dots');
+  slides.forEach((s, i) => {
+    s.id = s.id || 's' + (i + 1);
+    const a = el('a', { href: '#' + s.id, title: s.dataset.title, className: s.dataset.part ? 'part' : '' });
+    a.setAttribute('aria-label', s.dataset.title);
+    dots.appendChild(a);
+  });
+  let current = 0;
+  const seen = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    current = slides.indexOf(e.target);
+    $$('#dots a').forEach((d, i) => d.classList.toggle('on', i === current));
+    $('#where').textContent = (current + 1) + ' / ' + slides.length + '   ' + e.target.dataset.title;
+    $('#progress').style.width = ((current + 1) / slides.length * 100) + '%';
+    ppSync();
+  }), { threshold: 0.5 });
+  slides.forEach(s => seen.observe(s));
+  function go(i) { slides[Math.max(0, Math.min(slides.length - 1, i))].scrollIntoView(); }
+  const jump = Number(new URLSearchParams(location.search).get('slide'));
+  if (jump) slides[Math.max(0, Math.min(slides.length - 1, jump - 1))].scrollIntoView({ behavior: 'instant' });
+  document.addEventListener('keydown', e => {
+    const key = e.key || '';
+    if ((e.target.matches && e.target.matches('input, textarea')) || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(key)) { e.preventDefault(); go(current + 1); }
+    else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(key)) { e.preventDefault(); go(current - 1); }
+    else if (key === 'Home') go(0);
+    else if (key === 'End') go(slides.length - 1);
+    else if (key.toLowerCase() === 'n') toggleNotes();
+    else if (key === 'Escape') closeBox();
+  });
+  function toggleNotes() { $('#toggleNotes').setAttribute('aria-pressed', document.body.classList.toggle('show-notes')); }
+  $('#toggleNotes').onclick = toggleNotes;
+  const fmt = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  let elapsed = 0, clockTimer = 0;
+  $('#startClock').onclick = () => {
+    if (clockTimer) { clearInterval(clockTimer); clockTimer = 0; $('#startClock').textContent = 'Resume clock'; return; }
+    const from = Date.now() - elapsed * 1000;
+    clockTimer = setInterval(() => { elapsed = Math.floor((Date.now() - from) / 1000); $('#clock').textContent = fmt(elapsed); }, 500);
+    $('#startClock').textContent = 'Pause clock';
+  };
+
+  /* ---- agenda ---- */
+  const parts = [['Why design matters', 'A before and after, and the ten-second test', '10 min'],
+    ['Dashboard design', 'Audience, layout, clutter, colour and words', '18 min'],
+    ['Choosing the visual', 'Question first, chart second', '12 min'],
+    ['Dashboards I have designed', 'Real examples and what they taught me', '10 min'],
+    ['Your turn', 'Five laps in Power BI Desktop', '40 min']];
+  parts.forEach((p, i) => {
+    const target = slides.find(s => s.dataset.part === String(i + 1));
+    $('#agenda').appendChild(el('a', { href: '#' + target.id }, `<span class="n">${i + 1}</span><div><b>${p[0]}</b><span>${p[1]}</span></div><span class="t">${p[2]}</span>`));
+  });
+
+  /* ---- guess game ---- */
+  const gIn = $('#guessIn'), gOut = $('#guessOut');
+  function drawGuess(stage) {
+    const guess = Number(gIn.value), rows = [['Your guess', guess, GREY]];
+    if (stage >= 1) rows.push(['1980s, actual', 48, INK]);
+    if (stage >= 2) rows.push(['2020s, actual', 88, RED]);
+    const line = stage === 0 ? 'No peeking.' : stage === 1
+      ? (Math.abs(guess - 48) <= 5 ? 'Very close. It was 48%: fewer than half.' : 'It was 48%. More than half the grid did not make it.')
+      : 'Today it is 88%. That change is the story in the data.';
+    $('#guessDemo').innerHTML = `<svg viewBox="0 0 520 250" role="img" font-size="13"><text x="16" y="28" font-size="17" font-weight="700" fill="${INK}" font-family="Georgia">${line}</text>` +
+      rows.map(([n, v, c], i) => `<text x="16" y="${82 + i * 56}" fill="${MUT}">${n}</text><rect x="130" y="${62 + i * 56}" width="${v * 3.3}" height="32" fill="${c}"/><text x="${138 + v * 3.3}" y="${84 + i * 56}" font-weight="700" fill="${INK}">${v}%</text>`).join('') + '</svg>';
+  }
+  let guessStage = 0;
+  gIn.oninput = () => { gOut.textContent = gIn.value + '%'; drawGuess(guessStage); };
+  $('#guessGo').onclick = () => { guessStage = Math.max(guessStage, 1); drawGuess(guessStage); $('#guessNow').hidden = false; ppSync(); };
+  $('#guessNow').onclick = () => { guessStage = 2; drawGuess(2); };
+  drawGuess(0);
+
+  /* ---- seven checks: a private score ---- */
+  $$('.check input').forEach(box => { box.onchange = () => {
+    const n = $$('.check input:checked').length;
+    $('#score').textContent = n === 7 ? 'Seven of seven. Publish it.' : `Score: ${n} of 7.`;
+  }; });
+
+  /* ---- before / after ---- */
+  $('#cut').oninput = e => { const c = $('#compare'), v = +e.target.value; c.style.setProperty('--cut', v + '%');
+    c.classList.toggle('at-before', v > 92); c.classList.toggle('at-after', v < 8); };
+
+  /* ---- five-second test ---- */
+  let flashTimer = 0;
+  function flash(src) {
+    const box = $('#flash'), count = $('.count', box);
+    clearInterval(flashTimer);
+    $('img', box).src = src; box.classList.add('showing');
+    let n = 10; count.textContent = n;
+    flashTimer = setInterval(() => {
+      n -= 1; count.textContent = n;
+      if (n <= 0) { clearInterval(flashTimer); box.classList.remove('showing');
+        $('.msg p', box).innerHTML = src.includes('starter')
+          ? 'Did you find it? Probably not.<br>The answer is <b>88%</b>, but nothing on this page points you to it.'
+          : 'The answer: <b>88%</b>.<br>It was the biggest number on the page, in red.'; }
+    }, 1000);
+  }
+  $('#flashGo').onclick = () => { flashPoll = 'find2'; flash('assets/finished-story.jpg'); ppSync(); };
+  $('#flashPlain').onclick = () => { flashPoll = 'find1'; flash('assets/starter.jpg'); ppSync(); };
+
+  /* ---- storytelling: data + visuals + narrative ---- */
+  const trio = [
+    ['Data + Visuals', ['data', 'visuals'], 'Enlighten', 'A chart shows people something they could not see in a table. But nobody tells them why it matters.'],
+    ['Data + Narrative', ['data', 'narrative'], 'Explain', 'You make the case in words and numbers. It is correct, and most of the room has stopped listening.'],
+    ['Visuals + Narrative', ['visuals', 'narrative'], 'Engage', 'It looks great and reads well. Without solid data behind it, it is decoration.'],
+    ['All three', ['data', 'visuals', 'narrative'], 'Change', 'Trusted numbers, shown clearly, with a point. This is what gets a decision made.']];
+  chips($('#trioChips'), trio.map(t => t[0]), i => {
+    $$('#trio .ring').forEach(r => r.classList.toggle('on', trio[i][1].includes(r.dataset.k)));
+    $('#trioText').innerHTML = `<p class="kicker">You can</p><p class="big">${trio[i][2]}</p><p class="lede" style="margin-top:8px">${trio[i][3]}</p>`;
+  }, 3);
+
+  /* ---- audience ---- */
+  const audiences = [
+    ['An executive', 'Is it going well, and where do I need to act?', 'One page, a headline, three or four numbers. Nothing to click to get the point.', '4-poster', 'Poster'],
+    ['A manager', 'What changed, why, and what should my team do?', 'A clear story at the top, supporting charts below, detail one click away.', '2-paddock', 'Paddock'],
+    ['An analyst', 'Let me check the numbers and find the exception.', 'Dense and precise. Tables, small charts, filters. Speed over decoration.', '5-timing-sheet', 'Timing Sheet'],
+    ['A big screen', 'People walking past should get it in passing.', 'High contrast, large type, very few elements. Dark themes work well.', '3-night-race', 'Night Race']];
+  chips($('#audChips'), audiences.map(a => a[0]), i => {
+    const a = audiences[i];
+    $('#audOut').innerHTML = `<dl><div><dt>Their question</dt><dd style="font-family:var(--serif);font-size:24px">${a[1]}</dd></div><div><dt>So design it like this</dt><dd>${a[2]}</dd></div><div><dt>Example</dt><dd>The <b>${a[4]}</b> page in the gallery.</dd></div></dl><img class="shot" src="assets/gallery-${a[3]}.jpg" alt="${a[4]} style dashboard">`;
+  });
+
+  /* ---- layout hierarchy: spotlight areas of the page in reading order ---- */
+  const zones = [
+    [18.3, 2, 62, 13, 'The headline', 'The finding, in the biggest type on the page. If they read nothing else, they have the point.'],
+    [18.3, 17.5, 31.2, 29.4, 'The hook', 'One sentence and a picture. It tells people what kind of story this is.'],
+    [50.8, 17.5, 47.6, 29.4, 'The proof', 'Three numbers that back the headline. Large, with one line of explanation each.'],
+    [18.3, 48.6, 80.1, 48.4, 'The evidence', 'Charts for the people who want to check. Each title says what to look for.'],
+    [0, 0, 16.3, 100, 'The way round', 'Navigation stays in one place on every page, out of the way of the story.']];
+  let zi = -1;
+  function showZone(i) {
+    $$('#spot .zone').forEach(z => z.remove());
+    zi = i;
+    if (i < 0) { $('#zoneText').innerHTML = '<b>Five areas, one order.</b><p class="lede" style="margin-top:6px">Press Next area to walk through them.</p>'; return; }
+    const z = zones[i], b = el('button', { type: 'button', className: 'zone' }, `<i>${i + 1}</i>`);
+    b.setAttribute('aria-label', z[4]);
+    Object.assign(b.style, { left: z[0] + '%', top: z[1] + '%', width: z[2] + '%', height: z[3] + '%' });
+    $('#spot').appendChild(b);
+    $('#zoneText').innerHTML = `<b>${i + 1}. ${z[4]}</b><p class="lede" style="margin-top:6px">${z[5]}</p>`;
+  }
+  $('#zoneNext').onclick = () => showZone((zi + 1) % zones.length);
+  $('#zoneAll').onclick = () => showZone(-1);
+  showZone(-1);
+
+  /* ---- shared small charts ---- */
+  const DEC = ['1950s', '1960s', '1970s', '1980s', '1990s', '2000s', '2010s', '2020s'];
+  const MECH = [31, 36, 30, 37, 29, 18, 10, 5];
+  const FIN = [61, 55, 55, 48, 54, 71, 83, 88];
+  const svg = (w, h, inner) => `<svg viewBox="0 0 ${w} ${h}" role="img" font-size="11">${inner}</svg>`;
+
+  /* ---- declutter ---- */
+  const clutterSteps = ['Remove the background and border', 'Fade the gridlines', 'Drop the rainbow: one colour', 'Label the bars, delete the axis and legend',
+    'Highlight the bar that matters', 'Make the title say the finding'];
+  let cs = 0;
+  $('#clutterList').innerHTML = clutterSteps.map(s => `<li>${s}</li>`).join('');
+  function drawClutter() {
+    const W = 520, H = 330, x0 = cs >= 4 ? 20 : 54, base = 262, bw = (W - x0 - 24) / 8;
+    let o = '';
+    if (cs < 1) o += `<rect x="2" y="2" width="${W - 4}" height="${H - 4}" fill="#d9dde6" stroke="${INK}" stroke-width="3"/>`;
+    const title = cs >= 6 ? 'Mechanical failures fell from 37% to 5%' : 'Mechanical Failure Rate by Decade';
+    o += `<text x="${x0}" y="30" font-size="${cs >= 6 ? 19 : 15}" font-weight="700" fill="${INK}" font-family="${cs >= 6 ? 'Georgia' : 'Segoe UI'}">${title}</text>`;
+    if (cs >= 6) o += `<text x="${x0}" y="50" fill="${MUT}">Share of race starts ending in a mechanical failure</text>`;
+    if (cs < 4) [0, 10, 20, 30, 40].forEach(v => {
+      const y = base - v * 4.8;
+      o += `<line x1="${x0}" y1="${y}" x2="${W - 20}" y2="${y}" stroke="${cs < 2 ? '#555' : '#ece8de'}" stroke-width="${cs < 2 ? 1.2 : 1}"/><text x="${x0 - 8}" y="${y + 4}" text-anchor="end" fill="${MUT}">${v}%</text>`;
+    });
+    MECH.forEach((v, i) => {
+      const x = x0 + i * bw + 8, h = v * 4.8;
+      const fill = cs < 3 ? PAL[i] : (cs >= 5 ? (i === 7 ? RED : GREY) : MUT);
+      o += `<rect x="${x}" y="${base - h}" width="${bw - 16}" height="${h}" fill="${fill}"${cs < 1 ? ` stroke="${INK}" stroke-width="2"` : ''}/>`;
+      o += `<text x="${x + (bw - 16) / 2}" y="${base + 18}" text-anchor="middle" fill="${MUT}">${DEC[i]}</text>`;
+      if (cs >= 4) o += `<text x="${x + (bw - 16) / 2}" y="${base - h - 6}" text-anchor="middle" font-weight="${i === 7 && cs >= 5 ? 700 : 400}" fill="${i === 7 && cs >= 5 ? RED : MUT}">${v}%</text>`;
+    });
+    if (cs < 4) o += DEC.map((d, i) => `<rect x="${x0 + i * 56}" y="${H - 28}" width="10" height="10" fill="${cs < 3 ? PAL[i] : MUT}"/><text x="${x0 + i * 56 + 14}" y="${H - 19}" fill="${MUT}">${d}</text>`).join('');
+    $('#clutterDemo').innerHTML = svg(W, H, o);
+    $$('#clutterList li').forEach((li, i) => li.classList.toggle('done', i < cs));
+    $('#clutterNext').disabled = cs >= clutterSteps.length;
+    $('#clutterNext').textContent = cs >= clutterSteps.length ? 'Done' : 'Next: ' + clutterSteps[cs].toLowerCase();
+  }
+  $('#clutterNext').onclick = () => { cs = Math.min(clutterSteps.length, cs + 1); drawClutter(); };
+  $('#clutterReset').onclick = () => { cs = 0; drawClutter(); };
+  drawClutter();
+
+  /* ---- colour ---- */
+  const TOP = [['Hamilton', 105], ['Schumacher', 91], ['Verstappen', 71], ['Vettel', 53], ['Prost', 51], ['Senna', 41], ['Alonso', 32], ['Mansell', 31]];
+  const colourModes = [['Every bar a colour', i => PAL[i], 'Eight colours, eight things to decode. The eye has nowhere to land, and the colours mean nothing.'],
+    ['One accent', i => i === 0 ? RED : GREY, 'Grey says "context". Red says "look here". The reader finds the leader before reading a single label.'],
+    ['Accent on the story', i => i === 2 ? RED : GREY, 'Same chart, different point: the active driver who is still climbing. Colour follows the sentence you want to say.']];
+  chips($('#colourChips'), colourModes.map(m => m[0]), i => {
+    $('#colourText').textContent = colourModes[i][2];
+    $('#colourDemo').innerHTML = svg(520, 300, `<text x="16" y="24" font-size="15" font-weight="700" fill="${INK}">Race wins</text>` +
+      TOP.map(([n, v], k) => `<text x="104" y="${57 + k * 30}" text-anchor="end" fill="${MUT}">${n}</text><rect x="112" y="${42 + k * 30}" width="${v * 3.5}" height="20" fill="${colourModes[i][1](k)}"/><text x="${118 + v * 3.5}" y="${57 + k * 30}" fill="${MUT}">${v}</text>`).join(''));
+  });
+
+  /* ---- titles ---- */
+  const titles = [['A label', 'Finish Rate by Season', '', 'This is what Power BI writes for you. It says what the chart contains and nothing about what it shows.'],
+    ['A description', 'Share of starters reaching the finish, 1950 to 2025', '', 'Better: plain words, no field names. The reader still has to work out the point alone.'],
+    ['A headline', 'Nine in ten cars now finish. In the 1980s it was fewer than half.', 'Share of starters reaching the finish, by decade', 'The title makes the claim, the subtitle says what is plotted, and the chart is the proof.']];
+  chips($('#titleChips'), titles.map(t => t[0]), i => {
+    const t = titles[i], pts = FIN.map((v, k) => [50 + k * 62, 262 - (v - 30) * 3.4]);
+    $('#titleText').textContent = t[3];
+    $('#titleDemo').innerHTML = svg(520, 300,
+      `<text x="16" y="26" font-size="${i === 2 ? 15.5 : 14}" font-weight="700" fill="${INK}" font-family="${i === 2 ? 'Georgia' : 'Segoe UI'}">${t[1]}</text>` +
+      (t[2] ? `<text x="16" y="46" fill="${MUT}">${t[2]}</text>` : '') +
+      [40, 60, 80].map(v => `<line x1="40" y1="${262 - (v - 30) * 3.4}" x2="504" y2="${262 - (v - 30) * 3.4}" stroke="#ece8de"/><text x="34" y="${266 - (v - 30) * 3.4}" text-anchor="end" fill="${MUT}">${v}%</text>`).join('') +
+      `<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="${RED}" stroke-width="3"/>` +
+      pts.map((p, k) => `<text x="${p[0]}" y="284" text-anchor="middle" fill="${MUT}">${DEC[k]}</text>`).join('') +
+      (i === 2 ? `<circle cx="${pts[3][0]}" cy="${pts[3][1]}" r="5" fill="${INK}"/><text x="${pts[3][0]}" y="${pts[3][1] + 20}" text-anchor="middle" font-weight="700" fill="${INK}">48%</text><circle cx="${pts[7][0]}" cy="${pts[7][1]}" r="5" fill="${RED}"/><text x="${pts[7][0] - 8}" y="${pts[7][1] - 10}" text-anchor="end" font-weight="700" fill="${RED}">88%</text>` : ''));
+  }, 0);
+
+  /* ---- chart chooser ---- */
+  const mini = {
+    bar: `<rect x="10" y="12" width="110" height="16" fill="${RED}"/><rect x="10" y="36" width="82" height="16" fill="${GREY}"/><rect x="10" y="60" width="60" height="16" fill="${GREY}"/><rect x="10" y="84" width="38" height="16" fill="${GREY}"/>`,
+    line: `<polyline points="8,86 34,72 58,78 84,44 110,36 140,14" fill="none" stroke="${RED}" stroke-width="4"/>`,
+    stack: `<rect x="10" y="40" width="88" height="26" fill="${RED}"/><rect x="98" y="40" width="42" height="26" fill="${GREY}"/><text x="14" y="30" font-size="20" font-weight="700" fill="${INK}">68%</text>`,
+    scatter: [[20, 86], [36, 70], [48, 78], [62, 54], [78, 60], [94, 38], [110, 44], [128, 20]].map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="6" fill="${INK}"/>`).join('') + `<circle cx="120" cy="84" r="7" fill="${RED}"/>`,
+    hist: [18, 40, 70, 88, 62, 36, 16].map((h, i) => `<rect x="${8 + i * 20}" y="${100 - h}" width="18" height="${h}" fill="${i === 3 ? RED : GREY}"/>`).join(''),
+    table: [0, 1, 2, 3].map(i => `<rect x="8" y="${10 + i * 24}" width="134" height="20" fill="${i ? '#f1eee6' : INK}"/><rect x="100" y="${15 + i * 24}" width="${[0, 36, 24, 12][i]}" height="10" fill="${RED}"/>`).join(''),
+  };
+  const intents = [
+    ['Compare things', 'bar', 'Bar chart', 'Sort it. Horizontal bars when names are long. One colour for the bar you are talking about.', 'A pie or donut with more than three slices.'],
+    ['Show change over time', 'line', 'Line chart', 'Time runs left to right. One to four lines at most; label them at the end.', 'A table of dates, or a column for every day.'],
+    ['Show part of a whole', 'stack', 'One big number, or a single stacked bar', 'A percentage in large type often says it best.', 'A pie where the slices are close in size.'],
+    ['Show a relationship', 'scatter', 'Scatter chart', 'Two measures, one dot per thing. Label only the outliers.', 'Two separate bar charts and hoping people connect them.'],
+    ['Show the spread', 'hist', 'Histogram or box plot', 'Use when the shape matters: where most values sit, and how far the extremes go.', 'An average on its own. It hides the story.'],
+    ['Give exact values', 'table', 'Table or matrix', 'For looking up one row. Add bars inside cells so it can also be scanned.', 'A chart with a label on every single point.']];
+  chips($('#intents'), intents.map(i => i[0]), i => {
+    const it = intents[i];
+    $('#advice').innerHTML = `<svg viewBox="0 0 150 110" role="img" aria-label="${it[2]}">${mini[it[1]]}</svg><div><p class="kicker">Reach for</p><p class="use">${it[2]}</p><p style="margin-top:6px">${it[3]}</p><p class="muted" style="margin-top:6px"><b>Think twice about:</b> ${it[4]}</p></div>`;
+  });
+
+  /* ---- chart vote: six charts from the same numbers, three questions ---- */
+  const WINS = [['Lewis Hamilton', 105], ['Michael Schumacher', 91], ['Max Verstappen', 71], ['Sebastian Vettel', 53], ['Alain Prost', 51],
+    ['Ayrton Senna', 41], ['Fernando Alonso', 32], ['Nigel Mansell', 31], ['Jackie Stewart', 27], ['Jim Clark', 25], ['Niki Lauda', 25]];
+  const RATE = [['1950s', 61], ['1960s', 55], ['1970s', 55], ['1980s', 48], ['1990s', 54], ['2000s', 71], ['2010s', 83], ['2020s', 88]];
+  const kinds = { A: 'Bar chart', B: 'Column chart', C: 'Line chart', D: 'Donut chart', E: 'Table', F: 'Treemap' };
+  const rounds = [
+    { q: 'Who has won the most races?', d: WINS, best: 'A',
+      v: { A: 'Best. Names read across, bars already ranked.', B: 'Works, but long names tilt and get cut off.', C: 'Misleading. A line implies a sequence.',
+        D: 'Eleven slices. Can you tell fourth from fifth?', E: 'Exact, but you read every number to compare.', F: 'Shows share of total. Rank is hard to see.' } },
+    { q: 'Has Formula 1 become more reliable?', d: RATE, unit: '%', head: ['Decade', 'Finish rate'], sortBars: true, best: 'C',
+      v: { A: 'Sorted by size, so the order of time is lost.', B: 'Good. Time runs left to right.', C: 'Best. A line shows change over time.',
+        D: 'Wrong. These are not parts of one whole.', E: 'Exact, but you cannot see the trend.', F: 'Wrong. Size means nothing here.' } },
+    { q: 'How many races did Alain Prost win?', d: WINS, best: 'E',
+      v: { A: 'Works, but only because every bar is labelled.', B: 'No values shown. You would have to guess.', C: 'No values, and the order is alphabetical.',
+        D: 'Shows his share, not his wins.', E: 'Best. One row, one exact number.', F: 'No numbers at all.' } }];
+  const W = 340, H = 232, cut = n => n.length > 11 ? n.slice(0, 10) + '…' : n;
+  const cv = inner => `<svg viewBox="0 0 ${W} ${H}" role="img" font-size="9">${inner}</svg>`;
+  function chartsFor(r) {
+    const D = r.d, N = D.length, u = r.unit || '', max = Math.max(...D.map(d => d[1])), step = 324 / N, bw = step * .64, head = r.head || ['Driver', 'Wins'];
+    const bars = r.sortBars ? [...D].sort((a, b) => b[1] - a[1]) : D;
+    const xlab = (n, i) => `<text transform="translate(${(10 + i * step + bw * .75).toFixed(1)} 170) rotate(-40)" text-anchor="end" fill="${MUT}">${cut(n)}</text>`;
+    const base = `<line x1="8" y1="160" x2="334" y2="160" stroke="${GREY}"/>`;
+    return {
+      A: () => cv(bars.map(([n, v], i) => `<text x="96" y="${17 + i * 20}" text-anchor="end" fill="${MUT}">${n}</text><rect x="102" y="${8 + i * 20}" width="${v / max * 200}" height="12" fill="${i ? GREY : RED}"/><text x="${106 + v / max * 200}" y="${17 + i * 20}" fill="${MUT}">${v}${u}</text>`).join('')),
+      B: () => cv(D.map(([n, v], i) => `<rect x="${(10 + i * step).toFixed(1)}" y="${160 - v / max * 145}" width="${bw.toFixed(1)}" height="${v / max * 145}" fill="${RED}"/>` + xlab(n, i)).join('') + base),
+      C: () => { const A = [...D].sort((a, b) => a[0].localeCompare(b[0])), pts = A.map(([n, v], i) => [(10 + i * step + bw / 2).toFixed(1), 160 - v / max * 145]);
+        return cv(`<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="${RED}" stroke-width="2.5"/>` + A.map(([n], i) => xlab(n, i)).join('') + base); },
+      D: () => { const total = D.reduce((s, d) => s + d[1], 0); let a = -Math.PI / 2, out = '';
+        D.forEach(([n, v], i) => { const b = a + v / total * Math.PI * 2, R = 84, rr = 50, cx = 170, cy = 116, big = b - a > Math.PI ? 1 : 0;
+          const p = (rad, ang) => (cx + rad * Math.cos(ang)).toFixed(1) + ' ' + (cy + rad * Math.sin(ang)).toFixed(1), m = (a + b) / 2;
+          out += `<path d="M${p(R, a)}A${R} ${R} 0 ${big} 1 ${p(R, b)}L${p(rr, b)}A${rr} ${rr} 0 ${big} 0 ${p(rr, a)}Z" fill="${PAL[i]}" stroke="#fff"/><text x="${(cx + 102 * Math.cos(m)).toFixed(0)}" y="${(cy + 102 * Math.sin(m) + 3).toFixed(0)}" text-anchor="middle" fill="${MUT}">${(v / total * 100).toFixed(1)}%</text>`;
+          a = b; });
+        return cv(out); },
+      E: () => cv(`<text x="20" y="16" font-weight="700" fill="${INK}">${head[0]}</text><text x="320" y="16" text-anchor="end" font-weight="700" fill="${INK}">${head[1]}</text><line x1="20" y1="21" x2="320" y2="21" stroke="${INK}"/>` + D.map(([n, v], i) => `<text x="20" y="${37 + i * 18}" fill="${INK}">${n}</text><text x="320" y="${37 + i * 18}" text-anchor="end" fill="${INK}">${v}${u}</text>`).join('')),
+      F: () => { let out = '', x = 6, y = 6, w = 328, h = 220, rest = D.reduce((s, d) => s + d[1], 0);
+        D.forEach(([n, v], i) => { const share = v / rest, last = i === N - 1, rw = w >= h ? (last ? w : w * share) : w, rh = w >= h ? h : (last ? h : h * share);
+          out += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" fill="${PAL[i]}" stroke="#fff"/>` + (rw > 36 && rh > 16 ? `<text x="${(x + 5).toFixed(0)}" y="${(y + 13).toFixed(0)}" fill="${[3, 5, 8, 9].includes(i) ? INK : '#fff'}">${n.split(' ').pop()}</text>` : '');
+          if (w >= h) { x += rw; w -= rw; } else { y += rh; h -= rh; } rest -= v; });
+        return cv(out); },
+    };
+  }
+  const clinic = $('#clinic');
+  let round = 0;
+  function setReveal(on) { clinic.classList.toggle('revealed', on); $('#reveal').textContent = on ? 'Hide the verdicts' : 'Show the verdicts'; ppSync(); }
+  function drawRound() {
+    const r = rounds[round], ch = chartsFor(r);
+    clinic.innerHTML = ''; setReveal(false); $('#voteNote').textContent = '';
+    $('#voteQ').textContent = r.q; $('#voteStep').textContent = `Pick the chart · question ${round + 1} of ${rounds.length}`;
+    Object.keys(ch).forEach(k => {
+      const b = el('button', { type: 'button', className: 'pick' + (k === r.best ? ' best' : '') }, `<b>${k} &nbsp; ${kinds[k]}</b><span class="votes"></span>${ch[k]()}<div class="verdict">${r.v[k]}</div>`);
+      b.setAttribute('aria-pressed', 'false'); b.dataset.key = k;
+      b.onclick = () => { $$('.pick', clinic).forEach(x => x.setAttribute('aria-pressed', x === b)); $('#voteNote').textContent = 'You picked ' + k + '.'; };
+      clinic.appendChild(b);
+    });
+  }
+  drawRound();
+  $('#voteNext').onclick = () => { round = (round + 1) % rounds.length; drawRound(); ppSync(); };
+  $('#reveal').onclick = () => setReveal(!clinic.classList.contains('revealed'));
+  $('#think').onclick = e => { const b = e.currentTarget; let n = 3; setReveal(false); b.disabled = true; b.textContent = n + ' ...';
+    const t = setInterval(() => { n -= 1; if (n > 0) { b.textContent = n + ' ...'; return; }
+      clearInterval(t); b.disabled = false; b.textContent = 'Three seconds to decide'; setReveal(true); }, 1000); };
+
+  /* ---- cut-off axis ---- */
+  chips($('#axisChips'), ['Axis starts at 80%', 'Axis starts at 0%'], i => {
+    const lo = i === 0 ? 80 : 0, hi = 90, base = 250, top = 60, y = v => base - (v - lo) / (hi - lo) * (base - top);
+    const bars = [['2010s', 83, GREY], ['2020s', 88, RED]];
+    $('#axisDemo').innerHTML = svg(520, 300, `<text x="16" y="26" font-size="15" font-weight="700" fill="${INK}">Finish rate: 2010s against 2020s</text><text x="16" y="45" fill="${MUT}">${i === 0 ? 'Looks like reliability more than doubled.' : 'The honest picture: five points better.'}</text>` +
+      [lo, (lo + hi) / 2, hi].map(v => `<line x1="60" y1="${y(v)}" x2="500" y2="${y(v)}" stroke="#ece8de"/><text x="52" y="${y(v) + 4}" text-anchor="end" fill="${MUT}">${v}%</text>`).join('') +
+      bars.map(([n, v, c], k) => `<rect x="${130 + k * 190}" y="${y(v)}" width="110" height="${base - y(v)}" fill="${c}"/><text x="${185 + k * 190}" y="${y(v) - 8}" text-anchor="middle" font-weight="700" fill="${INK}">${v}%</text><text x="${185 + k * 190}" y="${base + 20}" text-anchor="middle" fill="${MUT}">${n}</text>`).join(''));
+  });
+
+  /* ---- lightbox ---- */
+  const box = $('#lightbox');
+  let lastFocus = null;
+  function openBox(src, alt, text) { lastFocus = document.activeElement; $('img', box).src = src; $('img', box).alt = alt; $('p', box).textContent = text; box.classList.add('open'); $('#lightboxClose').focus(); }
+  function closeBox() { if (!box.classList.contains('open')) return; box.classList.remove('open'); if (lastFocus) lastFocus.focus(); }
+  box.onclick = closeBox;
+
+  /* ---- gallery ---- */
+  const looks = [['1-editorial', 'Editorial', 'Paper, ink and one red accent. Quiet and formal.'], ['2-paddock', 'Paddock', 'Navigation rail, serif headline, photo hero.'],
+    ['3-night-race', 'Night Race', 'Dark canvas with a single amber accent.'], ['4-poster', 'Poster', 'One number, one chart, one photograph.'],
+    ['5-timing-sheet', 'Timing Sheet', 'Dense, monospaced and table first.']];
+  looks.forEach(([file, name, text]) => {
+    const b = el('button', { type: 'button', className: 'thumb' }, `<img src="assets/gallery-${file}.jpg" alt="${name} style dashboard"><b>${name}</b>`);
+    b.onclick = e => { e.stopPropagation(); openBox(`assets/gallery-${file}.jpg`, name + ' style dashboard', name + '. ' + text); };
+    $('#gallery').appendChild(b);
+  });
+  $('#gallery').appendChild(el('div', { className: 'legend' }, looks.map(l => `<p><b>${l[1]}.</b> ${l[2]}</p>`).join('') +
+    '<p style="margin-top:6px">Same model, same measures, built-in visuals only. All five are pages in <code>powerbi/Gallery.pbix</code>.</p>'));
+
+  /* ---- my own work: show only the screenshots that exist ---- */
+  myWork.forEach(w => {
+    const probe = new Image();
+    probe.onload = () => {
+      $('#workEmpty').hidden = true;
+      const b = el('button', { type: 'button', className: 'thumb' }, `<img src="assets/my-work/${w.file}" alt="${w.title}"><b>${w.title}</b><span>${w.note}</span>`);
+      b.onclick = e => { e.stopPropagation(); openBox(`assets/my-work/${w.file}`, w.title, w.title + '. ' + w.note); };
+      $('#work').appendChild(b);
+    };
+    probe.src = `assets/my-work/${w.file}`;
+  });
+
+  /* ---- round timers ---- */
+  $$('.timer').forEach(t => {
+    const total = Number(t.dataset.minutes) * 60, name = t.dataset.name; let left = total, id = 0;
+    t.innerHTML = `<span class="t" role="timer" aria-label="Time left in ${name}">${fmt(left)}</span><button class="btn red" type="button" aria-label="Start ${name} timer">Start</button><button class="btn ghost" type="button" aria-label="Reset ${name} timer">Reset</button>`;
+    const [out, start, reset] = t.children;
+    const paint = () => { out.textContent = fmt(left); t.classList.toggle('done', left === 0); };
+    start.onclick = () => {
+      if (id) { clearInterval(id); id = 0; start.textContent = 'Resume'; return; }
+      if (left === 0) left = total;
+      start.textContent = 'Pause';
+      id = setInterval(() => { left -= 1; paint(); if (left <= 0) { clearInterval(id); id = 0; start.textContent = 'Start'; } }, 1000);
+    };
+    reset.onclick = () => { clearInterval(id); id = 0; left = total; start.textContent = 'Start'; paint(); };
+  });
+
+
+  /* ---- live voting: only the presenter's copy drives it; every other copy of this page is unchanged ---- */
+  (function () {
+    const V = window.PPVote, btn = $('#hostBtn'), stat = $('#voteStat'), clear = $('#voteReset');
+    if (!V) return;
+    const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      set: (k, v) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) { /* carry on */ } } };
+    const invited = new URLSearchParams(location.search).has('host');
+    const tallies = {}, total = t => Object.values(t || {}).reduce((a, b) => a + b, 0);
+    let pin = store.get('pp-host-pin'), active, wantTimer = 0, loop = 0, online = true, chain = Promise.resolve();
+
+    function pollFor(slide) {
+      if (!slide) return null;
+      if (slide.dataset.poll) return slide.dataset.poll;
+      if (slide.dataset.pollDyn === 'chart') return 'chart' + (round + 1);
+      if (slide.dataset.pollDyn === 'find') return flashPoll;
+      return null;
+    }
+    const revealed = poll => poll === 'guess' ? guessStage >= 1 : true;
+    const bestOf = poll => poll === 'guess' ? 'b' : null;
+    const pct = (c, n) => n ? Math.round(c / n * 100) : 0;
+    const head = n => `<div class="lh"><span>Vote at <b>${V.SHORT}/v</b></span><span>${n} vote${n === 1 ? '' : 's'}</span></div>`;
+    function rows(poll) {
+      const t = tallies[poll] || {}, n = total(t), top = Math.max(0, ...Object.values(t)), best = bestOf(poll);
+      return '<div class="rows">' + V.POLLS[poll].o.map(([k, lab]) => {
+        const c = t[k] || 0, hot = best ? k === best : c > 0 && c === top;
+        return `<div class="lrow${hot ? ' top' : ''}"><span class="l">${lab}</span><div class="bar"><i style="width:${pct(c, n)}%"></i></div><span class="p">${pct(c, n)}%</span></div>`;
+      }).join('') + '</div>';
+    }
+    function found(poll, name, hot) {
+      const t = tallies[poll] || {}, n = total(t), p = pct(t.yes || 0, n);
+      return `<div class="lrow${hot ? ' top' : ''}"><span class="l">${name}</span><div class="bar"><i style="width:${p}%"></i></div><span class="p">${n ? p + '%' : ''}</span></div>`;
+    }
+    function paint() {
+      if (!pin) return;
+      $$('.live').forEach(box => {
+        const id = box.dataset.live;
+        if (id === 'find') {
+          box.innerHTML = head(total(tallies[flashPoll || 'find1'])) + '<span class="muted small">Found the answer in ten seconds</span><div class="rows">' +
+            found('find1', 'Plain report', false) + found('find2', 'Designed report', true) + '</div>';
+        } else if (box.hasAttribute('data-headonly')) {
+          box.innerHTML = head(total(tallies[id]));
+        } else {
+          box.innerHTML = head(total(tallies[id])) + (revealed(id) ? rows(id) : '<span class="muted small">The split appears when the answer is revealed.</span>');
+        }
+      });
+      const cp = 'chart' + (round + 1), ct = tallies[cp] || {}, cn = total(ct), shown = clinic.classList.contains('revealed');
+      $$('.pick', clinic).forEach(tile => {
+        const c = ct[tile.dataset.key] || 0, tag = $('.votes', tile);
+        if (tag) tag.textContent = shown && cn ? `${c} vote${c === 1 ? '' : 's'} · ${pct(c, cn)}%` : '';
+      });
+      if (active === cp) $('#voteNote').textContent = `${cn} vote${cn === 1 ? '' : 's'} in. Vote at ${V.SHORT}/v`;
+      const st = tallies.steal || {};
+      $$('.fv').forEach(e => { e.textContent = st[e.dataset.key] ? st[e.dataset.key] : ''; });
+      stat.textContent = !online ? 'Voting offline' : active ? `Voting open · ${total(tallies[active])}` : 'Voting ready';
+      stat.classList.toggle('bad', !online);
+    }
+    async function pull(poll) {
+      const t = await V.tally(poll);
+      if (t) tallies[poll] = t;
+      online = !!t;
+      paint();
+    }
+    function setHost() {
+      const on = !!pin;
+      document.body.classList.toggle('host', on);
+      btn.hidden = on || !invited;
+      stat.hidden = clear.hidden = !on;
+      if (on) paint();
+    }
+    function dropHost() { pin = null; store.set('pp-host-pin', null); clearInterval(loop); active = undefined; setHost(); }
+    // Opens the question that belongs to the slide on screen, or closes voting on any other slide.
+    function want() {
+      clearTimeout(wantTimer);
+      wantTimer = setTimeout(() => {
+        if (!pin) return;
+        const slide = slides[current], next = pollFor(slide);
+        if (slide && slide.dataset.pollDyn === 'find') ['find1', 'find2'].filter(p => p !== next).forEach(pull);
+        if (next === active) { paint(); return; }
+        active = next;
+        clearInterval(loop);
+        chain = chain.then(() => V.host(pin, next ? 'open' : 'close', next)).then(r => {
+          online = !!r;
+          if (r && r.why === 'pin') { dropHost(); return; }
+          paint();
+        });
+        if (next) { pull(next); loop = setInterval(() => { if (active === next) pull(next); }, 1200); }
+        paint();
+      }, 450);
+    }
+    btn.onclick = async () => {
+      const typed = (prompt('Presenter PIN for live voting') || '').trim();
+      if (!typed) return;
+      const r = await V.host(typed, 'check');
+      if (r && r.ok) { pin = typed; store.set('pp-host-pin', typed); setHost(); want(); }
+      else alert(r ? 'That PIN is not right.' : 'The voting service could not be reached.');
+    };
+    clear.onclick = async () => {
+      if (!confirm('Clear every vote from every question?')) return;
+      const r = await V.host(pin, 'reset');
+      if (r && r.ok) { Object.keys(tallies).forEach(k => delete tallies[k]); paint(); }
+      else alert('The votes could not be cleared.');
+    };
+    stat.onclick = () => { if (confirm('Stop presenting votes on this computer?')) { V.host(pin, 'close'); dropHost(); } };
+    document.addEventListener('pp:sync', want);
+    setHost();
+    if (pin) V.host(pin, 'check').then(r => { if (r && !r.ok) dropHost(); else { online = !!r; want(); } });
+  })();
+
+  /* ---- background swap ---- */
+  $('#swapBtn').onclick = e => { const on = $('#swap').classList.toggle('on'); e.target.setAttribute('aria-pressed', on); e.target.textContent = on ? 'Show the background alone' : 'Put the visuals on top'; };
+})();
+</script>
+</body>
+</html>

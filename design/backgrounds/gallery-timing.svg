@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs></defs>
+  <rect id="page" width="1280" height="720" fill="#FFFFFF"/>
+  <rect id="top-bar" x="0" y="0" width="1280" height="72" fill="#15151A"/>
+  <rect id="red-line" x="0" y="72" width="1280" height="3" fill="#E10600"/>
+  <rect id="sector-1" x="40" y="132" width="600" height="2" fill="#15151A"/>
+  <rect id="sector-2" x="680" y="132" width="560" height="2" fill="#15151A"/>
+  <rect id="sector-3" x="680" y="412" width="560" height="2" fill="#15151A"/>
+  <rect id="purple-chip" x="40" y="96" width="10" height="22" fill="#8E24AA"/>
+  <rect id="green-chip" x="680" y="96" width="10" height="22" fill="#2E7D5B"/>
+  <rect id="yellow-chip" x="680" y="376" width="10" height="22" fill="#F2C200"/>
+</svg>

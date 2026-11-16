@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pole Position workbook: a dashboard makeover in Power BI</title>
+<style>
+:root{--ink:#15151a;--paper:#f4f1ea;--card:#fff;--red:#e10600;--muted:#6b675e;--line:#dcd7cb;--grey:#b9b4a7;
+  --serif:Georgia,"Times New Roman",serif;--sans:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;--mono:Consolas,"Courier New",monospace}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55}
+h1,h2,h3{font-family:var(--serif);line-height:1.1;margin:0;text-wrap:balance}
+h1{font-size:clamp(34px,4.6vw,60px)}
+h2{font-size:clamp(26px,3vw,38px)}
+h3{font-size:19px}
+p{margin:0}
+img{max-width:100%;display:block}
+a{color:inherit}
+code{font-family:var(--mono);font-size:.9em;background:#ebe7dc;border-radius:4px;padding:1px 6px;white-space:nowrap}
+b.ui{font-weight:600;background:var(--ink);color:#fff;border-radius:4px;padding:1px 7px;font-size:.88em;white-space:nowrap}
+.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(18px,4vw,40px)}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+
+.top{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff}
+.top .wrap{display:flex;align-items:center;gap:18px;height:54px}
+.top .brand{font-weight:700;letter-spacing:.08em;font-size:13px;border-left:4px solid var(--red);padding-left:10px;white-space:nowrap}
+.top nav{display:flex;gap:4px;overflow-x:auto;flex:1}
+.top nav a{text-decoration:none;font-size:13px;font-weight:600;color:var(--grey);padding:6px 10px;border-radius:6px;white-space:nowrap}
+.top nav a:hover,.top nav a.on{color:#fff;background:#2a2a33}
+.top nav a.done::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-left:6px;vertical-align:middle}
+.meter{width:120px;height:6px;background:#33333c;border-radius:3px;overflow:hidden;flex:none}
+.meter i{display:block;height:100%;width:0;background:var(--red);transition:width .25s}
+#count{font-size:12px;color:var(--grey);white-space:nowrap}
+.top nav{min-width:0}
+@media (max-width:700px){html{scroll-padding-top:100px}.top .wrap{flex-wrap:wrap;height:auto;padding-top:9px;padding-bottom:7px;gap:6px 12px}.top .brand{margin-right:auto}.top nav{order:3;flex:1 0 100%}.meter{width:auto;flex:1 1 30px;max-width:90px}}
+
+header.hero{padding:56px 0 34px}
+header.hero h1{margin:10px 0 14px}
+header.hero .lede{font-size:20px;color:var(--muted);max-width:60ch}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:28px}
+.fact{background:var(--card);border-radius:10px;padding:16px 18px}
+.fact b{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:28px}
+.strip figure{margin:0}
+.strip img{border-radius:8px;aspect-ratio:16/9;object-fit:cover;width:100%;border:1px solid var(--line)}
+.strip figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+@media (max-width:760px){.strip{grid-template-columns:repeat(2,1fr)}}
+
+section.lap{padding:44px 0;border-top:1px solid var(--line)}
+.lap-head{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:end;margin-bottom:8px}
+.lap-head .n{font-family:var(--serif);font-weight:700;font-size:64px;line-height:.8;color:var(--red)}
+.lap-head .time{font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--muted);white-space:nowrap}
+.why{color:var(--muted);max-width:70ch;margin:10px 0 22px}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:30px;align-items:start}
+@media (max-width:980px){.grid{grid-template-columns:1fr}figure.see{position:static}}
+ol.steps{list-style:none;margin:0;padding:0;counter-reset:s;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+ol.steps code{white-space:normal;overflow-wrap:anywhere;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+ol.steps>li{counter-increment:s;background:var(--card);border-radius:10px;padding:12px 14px 12px 50px;position:relative}
+ol.steps>li::before{content:counter(s);position:absolute;left:14px;top:12px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center}
+ol.steps>li.done{background:#ebe7dc;color:var(--muted)}
+ol.steps>li.done::before{background:var(--red)}
+ol.steps>li input{position:absolute;right:12px;top:14px;width:18px;height:18px;accent-color:var(--red);cursor:pointer}
+ol.steps>li>span{display:block;padding-right:30px}
+.pg{display:block;width:fit-content;font-style:normal;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:1px;margin-bottom:5px}
+.pg::before{content:"Page: ";font-weight:600}
+.pg.any::before{content:""}
+.pg.start,.pg.go{color:var(--red);border-color:var(--red)}
+.pg.start::before{content:"Start on page: "}
+.pg.go::before{content:"Switch to page: "}
+li.done .pg{color:var(--muted);border-color:var(--line)}
+ol.steps li em{font-style:normal;display:block;font-size:14.5px;color:var(--muted);margin-top:4px}
+h3.sub{margin:18px 0 8px;font-family:var(--sans);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+figure.see{margin:0;position:sticky;top:74px}
+figure.see img{border-radius:10px;border:1px solid var(--line);width:100%}
+figure.see figcaption{font-size:14px;color:var(--muted);margin-top:8px}
+figure.see+figure.see{margin-top:16px;position:static}
+.note{border-left:4px solid var(--red);background:var(--card);border-radius:0 10px 10px 0;padding:12px 16px;margin-top:14px;font-size:15.5px}
+.note>b:first-child{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:2px}
+.fix{margin-top:14px;font-size:15.5px}
+.fix summary{cursor:pointer;font-weight:600}
+.fix ul{margin:8px 0 0;padding-left:20px;color:var(--muted)}
+.panes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:18px}
+.panes div{background:var(--card);border-radius:10px;padding:16px 18px;font-size:15.5px}
+.panes h3{margin-bottom:6px}
+table.files{border-collapse:collapse;width:100%;margin-top:14px;font-size:15.5px;background:var(--card);border-radius:10px;overflow:hidden}
+table.files td,table.files th{padding:9px 14px;text-align:left;border-bottom:1px solid var(--line)}
+table.files tr:last-child td{border-bottom:0}
+footer{padding:36px 0 60px;border-top:1px solid var(--line);color:var(--muted);font-size:14.5px}
+:is(a,input,summary):focus-visible{outline:3px solid var(--red);outline-offset:2px}
+@media print{.top{display:none}body{background:#fff;font-size:11.5pt}section.lap{break-before:page;padding:14pt 0}figure.see{position:static}ol.steps>li{border:1px solid #ccc;break-inside:avoid}ol.steps>li input{display:none}.fix[open] summary{display:none}}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <span class="brand">POLE POSITION WORKBOOK</span>
+  <nav id="nav" aria-label="Laps"></nav>
+  <span id="count" aria-live="polite"></span>
+  <span class="meter" aria-hidden="true"><i id="bar"></i></span>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <p class="kicker">Hands-on workbook</p>
+  <h1>From a plain report to a dashboard that tells a story.</h1>
+  <p class="lede">Seven laps in Power BI Desktop. Each one ends with something you can see, and a checkpoint file in case you get stuck. Tick the steps as you go: this page remembers where you are.</p>
+  <div class="facts">
+    <div class="fact"><b>Time</b>Laps 1 to 5: about 40 minutes. Extra laps 6 and 7: about 15 more.</div>
+    <div class="fact"><b>You need</b>Power BI Desktop and this folder. No sign-in, no refresh, no custom visuals.</div>
+    <div class="fact"><b>Start with</b><code>powerbi/Starter.pbix</code></div>
+    <div class="fact"><b>Written for</b>Power BI Desktop, October 2026. Notes for older versions are marked.</div>
+  </div>
+  <div class="strip">
+    <figure><img src="assets/starter.jpg" alt="The plain starter report"><figcaption>Start</figcaption></figure>
+    <figure><img src="assets/lap-1.jpg" alt="The report after the theme and background"><figcaption>After lap 1</figcaption></figure>
+    <figure><img src="assets/lap-3.jpg" alt="The report with the right charts, a headline and three story numbers"><figcaption>After lap 3</figcaption></figure>
+    <figure><img src="assets/lap-5.jpg" alt="An animated scatter chart of drivers' career wins"><figcaption>After lap 5</figcaption></figure>
+  </div>
+</div></header>
+
+<section class="lap" id="before" data-nav="Before you start"><div class="wrap">
+  <p class="kicker">Before you start</p>
+  <h2>Three panes and a row of page tabs.</h2>
+  <p class="why">Open <code>powerbi/Starter.pbix</code>. Everything in this workbook happens on the page tabs along the bottom of the window and in the three panes on its right, plus two tabs on the ribbon.</p>
+  <div class="panes">
+    <div><h3>Page tabs</h3>The row along the bottom of the window: The story, Drivers, The race and the rest. Each one is a page of the report. Every step here starts with a label naming the page tab to be on, like this: <i class="pg go" style="display:inline-block;margin:0 0 0 2px">Drivers</i></div>
+    <div><h3>Visualizations</h3>Three tabs at the top. <b class="ui">Build visual</b> holds the chart icons and the field wells. <b class="ui">Format visual</b> changes how the selected chart looks. With nothing selected, the second tab becomes <b class="ui">Format page</b>.</div>
+    <div><h3>Data</h3>The tables and fields. The ready-made measures are in the <code>_Measures</code> table, sorted into folders: <code>Story</code>, <code>Presentation</code>, <code>Race</code> and <code>Profile</code>.</div>
+    <div><h3>Filters</h3>The thin strip at the right edge of the page. Click it to open. You only need <b class="ui">Filters on this visual</b>.</div>
+    <div><h3>Ribbon</h3><b class="ui">Design</b> has the theme. <b class="ui">View</b> opens the Selection and Bookmarks panes.</div>
+  </div>
+  <div class="note"><b>How to read a step</b>Dark labels like <b class="ui">Format visual</b> are things you click. Grey labels like <code>Finish Rate</code> are field names or text you type. A line in grey under a step says what should happen. The small label above a step is the page tab to be on: it turns red when you need to switch page.</div>
+  <div class="note"><b>Buttons while editing</b>In Power BI Desktop, hold <b class="ui">Ctrl</b> and click to use a button. A plain click only selects it.</div>
+  <table class="files">
+    <tr><th>If you are stuck on</th><th>Open this and carry on</th></tr>
+    <tr><td>Lap 2</td><td><code>powerbi/Lap-1.pbix</code></td></tr>
+    <tr><td>Lap 3</td><td><code>powerbi/Lap-2.pbix</code></td></tr>
+    <tr><td>Lap 4</td><td><code>powerbi/Lap-3.pbix</code></td></tr>
+    <tr><td>Lap 5</td><td><code>powerbi/Lap-4.pbix</code></td></tr>
+    <tr><td>Extra laps</td><td><code>powerbi/Lap-5.pbix</code></td></tr>
+    <tr><td>Everything done</td><td><code>powerbi/Finished.pbix</code></td></tr>
+  </table>
+</div></section>
+
+<section class="lap" id="lap1" data-nav="1 Look"><div class="wrap">
+  <div class="lap-head"><span class="n">1</span><div><p class="kicker">Lap 1</p><h2>Two files, a whole new look.</h2></div><span class="time">5 MINUTES</span></div>
+  <p class="why">A theme file sets colours, fonts and defaults for every visual at once. A background image carries the layout: panels, the navigation rail, the photo. You format nothing by hand.</p>
+  <div class="grid">
+    <div>
+      <ol class="steps">
+        <li><span><i class="pg any">Any page</i>On the ribbon, open the <b class="ui">Design</b> tab and click <b class="ui">Import theme</b>.<em>Older versions: View tab, the small arrow at the right of the Themes gallery, then Browse for themes.</em></span></li>
+        <li><span><i class="pg any">Any page</i>Choose <code>design/pole-position-theme.json</code> and click <b class="ui">Open</b>. Close the message that says the theme was imported.<em>The buttons, cards and charts restyle straight away. The page still looks empty on the left: that is next.</em></span></li>
+        <li><span><i class="pg start">The story</i>Click an empty part of the page so nothing is selected. In <b class="ui">Visualizations</b>, click the <b class="ui">Format page</b> tab.</span></li>
+        <li><span><i class="pg">The story</i>Open <b class="ui">Canvas background</b>. Next to <b class="ui">Image</b> click <b class="ui">Browse...</b> and choose <code>design/backgrounds/main.png</code>.<em>Pick the .png, not the .svg with the same name.</em></span></li>
+        <li><span><i class="pg">The story</i>Set <b class="ui">Image fit</b> to <b class="ui">Fit</b>. Set <b class="ui">Transparency</b> to <code>0</code>.<em>The rail, the photo and the white panels appear behind the visuals.</em></span></li>
+        <li><span><i class="pg go">Drivers</i>Go to the <b class="ui">Drivers</b> page (the tabs along the bottom). Repeat steps 3 to 5 with <code>drivers.png</code>.</span></li>
+        <li><span><i class="pg go">The race</i>Go to <b class="ui">The race</b> page. Repeat steps 3 to 5 with <code>race.png</code>.</span></li>
+      </ol>
+      <div class="note"><b>Where did the white text come from?</b>The words on the photo and the rail were in the file all along, written in white on a white page. The decade buttons on the Drivers page became tiles because the theme says slicers look that way.</div>
+      <details class="fix"><summary>If it looks wrong</summary><ul>
+        <li>The background looks washed out: Transparency is not 0.</li>
+        <li>The picture sits small in one corner: Image fit is still Normal. Set it to Fit.</li>
+        <li>Nothing changed after the theme: check the file was <code>pole-position-theme.json</code>, then import it again.</li>
+      </ul></details>
+    </div>
+    <div>
+      <figure class="see"><img src="assets/lap-1.jpg" alt="The story page after lap 1: dark rail, photo panel, serif numbers, but still a table, a pie and a donut"><figcaption>You should see this on The story. Same charts, new look.</figcaption></figure>
+      <figure class="see"><img src="assets/lap-1-drivers.jpg" alt="The Drivers page after lap 1 with decade tiles and red bars"><figcaption>And this on Drivers.</figcaption></figure>
+    </div>
+  </div>
+</div></section>
+
+<section class="lap" id="lap2" data-nav="2 Charts"><div class="wrap">
+  <div class="lap-head"><span class="n">2</span><div><p class="kicker">Lap 2</p><h2>Swap three charts.</h2></div><span class="time">8 MINUTES</span></div>
+  <p class="why">Start from the question, not from the chart. Change over time is a line. A rate is not a part of a whole, so it never belongs in a pie. Work on <b class="ui">The story</b> page.</p>
+  <div class="grid">
+    <div>
+      <h3 class="sub">The table becomes a line</h3>
+      <ol class="steps">
+        <li><span><i class="pg start">The story</i>Click the table. In <b class="ui">Build visual</b> click the <b class="ui">Line chart</b> icon.<em>You get three lines on one scale, which hides the one that matters.</em></span></li>
+        <li><span><i class="pg">The story</i>In the <b class="ui">Y-axis</b> well, remove <code>Race Starts</code> and <code>Wins From Pole %</code> with the <b class="ui">x</b> beside each. Keep <code>Finish Rate</code>.</span></li>
+        <li><span><i class="pg">The story</i><b class="ui">Format visual</b> &gt; <b class="ui">Visual</b> &gt; <b class="ui">Y-axis</b> &gt; <b class="ui">Range</b>. Type <code>0</code> in <b class="ui">Minimum</b> and <code>1</code> in <b class="ui">Maximum</b>.<em>1 means 100%. An honest axis for a share starts at zero.</em></span></li>
+        <li><span><i class="pg">The story</i><b class="ui">Format visual</b> &gt; <b class="ui">General</b> &gt; <b class="ui">Title</b>. In <b class="ui">Text</b> type <code>Share of starters reaching the finish</code>. Open <b class="ui">Subtitle</b> just below and in its <b class="ui">Text</b> type <code>Every World Championship race, 1950 to 2025</code>.</span></li>
+      </ol>
+      <h3 class="sub">The pie becomes columns</h3>
+      <ol class="steps" start="5" style="counter-reset:s 4">
+        <li><span><i class="pg">The story</i>Click the pie chart. Click the <b class="ui">Clustered column chart</b> icon.</span></li>
+        <li><span><i class="pg">The story</i>In the <b class="ui">Data</b> pane open <code>_Measures</code> &gt; <code>Story</code>. Drag <code>Accident Rate</code> into the <b class="ui">Y-axis</b> well, under <code>Mechanical Failure Rate</code>.</span></li>
+        <li><span><i class="pg">The story</i>The decades are in the wrong order. On the chart click <b class="ui">More options (...)</b> &gt; <b class="ui">Sort axis</b> &gt; <b class="ui">Decade</b>. Then <b class="ui">More options (...)</b> &gt; <b class="ui">Sort axis</b> &gt; <b class="ui">Sort ascending</b>.<em>Power BI sorts columns by size unless you say otherwise. Time must run left to right.</em></span></li>
+        <li><span><i class="pg">The story</i>In the <b class="ui">Y-axis</b> well, right-click <code>Mechanical Failure Rate</code> &gt; <b class="ui">Rename for this visual</b> and type <code>Mechanical</code>. Do the same for <code>Accident Rate</code>: <code>Accident</code>.</span></li>
+        <li><span><i class="pg">The story</i>Title: <code>What stopped them</code>. Subtitle: <code>Share of starts ending that way</code>.</span></li>
+      </ol>
+      <h3 class="sub">The donut becomes columns</h3>
+      <ol class="steps" start="10" style="counter-reset:s 9">
+        <li><span><i class="pg">The story</i>Click the donut. Click the <b class="ui">Clustered column chart</b> icon. Sort it by <b class="ui">Decade</b>, ascending, as in step 7.</span></li>
+        <li><span><i class="pg">The story</i><b class="ui">Format visual</b> &gt; <b class="ui">Visual</b>: switch <b class="ui">Data labels</b> on.</span></li>
+        <li><span><i class="pg">The story</i>Title: <code>The champion wins more</code>. Subtitle: <code>Share of a season's races</code>.</span></li>
+      </ol>
+      <details class="fix"><summary>If it looks wrong</summary><ul>
+        <li>The line is flat along the bottom: <code>Race Starts</code> is still in the Y-axis well.</li>
+        <li>The columns go tall to short: the chart is still sorted by value. Repeat step 7.</li>
+        <li>No Subtitle section: it is inside Title, below the Title text settings.</li>
+      </ul></details>
+    </div>
+    <figure class="see"><img src="assets/lap-2.jpg" alt="The story page after lap 2: a rising red line, grouped columns for failures and accidents, and columns for champion dominance"><figcaption>You should see the story appear: the line dips, then climbs to nine in ten.</figcaption></figure>
+  </div>
+</div></section>
+
+<section class="lap" id="lap3" data-nav="3 Words"><div class="wrap">
+  <div class="lap-head"><span class="n">3</span><div><p class="kicker">Lap 3</p><h2>A headline and three numbers.</h2></div><span class="time">9 MINUTES</span></div>
+  <p class="why">A title that names the topic makes the reader do the work. A headline states the finding. The three cards show totals nobody asked for: one filter turns each into a number with a point. Then one red column makes the same point in a chart.</p>
+  <div class="grid">
+    <div>
+      <ol class="steps">
+        <li><span><i class="pg start">The story</i>Double-click the title <code>F1 Dashboard</code>, select the words and type <code>Formula 1 stopped breaking down.</code></span></li>
+        <li><span><i class="pg">The story</i>Do the same to the line below it: <code>Fewer cars fail, so the fastest car wins more often. Seventy-six seasons of evidence.</code></span></li>
+        <li><span><i class="pg">The story</i>Click the first card (26K). Drag <code>Finish Rate</code> from <code>_Measures</code> &gt; <code>Story</code> into the <b class="ui">Fields</b> well, then remove <code>Race Starts</code> with its <b class="ui">x</b>.<em>The card shows 64%: the average over 76 seasons. True, and no use to anyone.</em></span></li>
+        <li><span><i class="pg">The story</i>Open the <b class="ui">Filters</b> pane. Drag <code>Decade</code> from the <code>Seasons</code> table onto <b class="ui">Filters on this visual</b>. Tick <b class="ui">1980s</b>.<em>The card now shows 48%.</em></span></li>
+        <li><span><i class="pg">The story</i>In the <b class="ui">Fields</b> well, right-click <code>Finish Rate</code> &gt; <b class="ui">Rename for this visual</b> and type <code>of starters finished, 1980s</code>.</span></li>
+        <li><span><i class="pg">The story</i>Second card (1,152): <code>Finish Rate</code> again, filtered to <b class="ui">2020s</b>, renamed <code>of starters finish, 2020s</code>.<em>88%.</em></span></li>
+        <li><span><i class="pg">The story</i>Make that one the only red number. <b class="ui">Format visual</b> &gt; <b class="ui">Visual</b> &gt; <b class="ui">Callout value</b> &gt; <b class="ui">Color</b>, and pick the red at the start of the theme colours.</span></li>
+        <li><span><i class="pg">The story</i>Third card (791): <code>Season Dominance %</code>, filtered to <b class="ui">2020s</b>, renamed <code>of races won by the champion</code>.<em>55%.</em></span></li>
+        <li><span><i class="pg">The story</i>Now make the same point in a chart. Click <code>The champion wins more</code>. <b class="ui">Format visual</b> &gt; <b class="ui">Visual</b> &gt; <b class="ui">Columns</b> &gt; <b class="ui">Color</b>, and click the <b class="ui">fx</b> button beside the colour.</span></li>
+        <li><span><i class="pg">The story</i>In the window that opens set <b class="ui">Format style</b> to <b class="ui">Field value</b>. Under <b class="ui">What field should we base this on?</b> open <code>_Measures</code> &gt; <code>Presentation</code> and choose <code>Decade Colour</code>. Click <b class="ui">OK</b>.<em>Seven grey columns and one red one, the same red as the 88%.</em></span></li>
+      </ol>
+      <div class="note"><b>Read it back</b>Headline, three numbers, three charts. Someone who looks for ten seconds now leaves with the finding. That is the test from the lecture.</div>
+      <details class="fix"><summary>If it looks wrong</summary><ul>
+        <li>The card still says 64%: the Decade filter went on another visual. Click the card first, then drag.</li>
+        <li>You see two numbers in one card: the old field is still in the Fields well.</li>
+        <li>The columns do not turn grey and red: the field must be <code>Decade Colour</code> from _Measures, not <code>Decade</code> from the top of the list.</li>
+      </ul></details>
+    </div>
+    <figure class="see"><img src="assets/lap-3.jpg" alt="The story page after lap 3 with the headline Formula 1 stopped breaking down, the numbers 48, 88 and 55 percent, and one red column in the last chart"><figcaption>You should see a page that makes its point before anyone reads a chart.</figcaption></figure>
+  </div>
+</div></section>
+
+<section class="lap" id="lap4" data-nav="4 Colour"><div class="wrap">
+  <div class="lap-head"><span class="n">4</span><div><p class="kicker">Lap 4</p><h2>Colour and titles that react.</h2></div><span class="time">5 MINUTES</span></div>
+  <p class="why">Grey for context, one colour for the point. In lap 3 a measure coloured one column. Here a measure colours the leader and writes the title, so both stay right whatever the reader selects.</p>
+  <div class="grid">
+    <div>
+      <ol class="steps">
+        <li><span><i class="pg start">Drivers</i>Go to <b class="ui">Drivers</b> and click the bar chart. <b class="ui">Format visual</b> &gt; <b class="ui">Visual</b> &gt; <b class="ui">Bars</b> &gt; <b class="ui">Color</b>, and click the <b class="ui">fx</b> button.<em>This is a bar chart, so the section is called Bars. On a column chart it is called Columns.</em></span></li>
+        <li><span><i class="pg">Drivers</i>As in lap 3: <b class="ui">Format style</b> <b class="ui">Field value</b>, then <code>_Measures</code> &gt; <code>Presentation</code> &gt; <code>Bar Colour</code>, <b class="ui">OK</b>.<em>Only the leader stays red.</em></span></li>
+        <li><span><i class="pg">Drivers</i><b class="ui">Format visual</b> &gt; <b class="ui">General</b> &gt; <b class="ui">Title</b>. Click the <b class="ui">fx</b> beside <b class="ui">Text</b>. Field value, <code>Title Text</code>, <b class="ui">OK</b>.<em>The title becomes a sentence: Lewis Hamilton won 105 races. Nobody has won more.</em></span></li>
+        <li><span><i class="pg">Drivers</i>In <b class="ui">Subtitle</b>, type <code>The ten drivers with the most wins</code>.</span></li>
+        <li><span><i class="pg">Drivers</i>Click <b class="ui">1990s</b> in the row of decades.<em>The bars, the red highlight and the sentence all change to Michael Schumacher. Click 1990s again to clear it.</em></span></li>
+      </ol>
+      <div class="note"><b>What just happened</b><code>Bar Colour</code> and <code>Title Text</code> are ordinary measures that return text: a colour code and a sentence. Open them in the Data pane to see how short they are. They are also in <code>guides/measures.dax</code>.</div>
+    </div>
+    <figure class="see"><img src="assets/lap-4.jpg" alt="The Drivers page after lap 4: one red bar for the leader and a title that names him"><figcaption>You should see one red bar and a title that says who it is.</figcaption></figure>
+  </div>
+</div></section>
+
+<section class="lap" id="lap5" data-nav="5 Motion"><div class="wrap">
+  <div class="lap-head"><span class="n">5</span><div><p class="kicker">Lap 5</p><h2>Build a tooltip, then press play.</h2></div><span class="time">12 MINUTES</span></div>
+  <p class="why">Detail belongs one step away, not on the page. First you build a tooltip from an empty page: a small report page that appears on hover. Then a play axis turns 76 seasons into twenty seconds of animation, built from four fields.</p>
+  <div class="grid">
+    <div>
+      <h3 class="sub">Build a tooltip page</h3>
+      <p class="muted small" style="margin-bottom:8px">Stuck, or short of time? The file already holds a hidden, ready-made page called <b class="ui">Backup tooltip</b>. Jump to step 8 and choose it as the Page.</p>
+      <ol class="steps">
+        <li><span><i class="pg any">Any page</i>Click the green <b class="ui">+</b> at the end of the page tabs (its name is New page).<em>An empty page called Page 1 opens.</em></span></li>
+        <li><span><i class="pg start">Page 1, the new page</i>Click the empty canvas. In Visualizations open <b class="ui">Format page</b> &gt; <b class="ui">Page information</b>. In <b class="ui">Name</b> type <code>Driver tooltip</code>, then switch <b class="ui">Allow use as tooltip</b> on.<em>The page shrinks to a small card. Power BI has set Canvas settings to Type Tooltip, 400 x 300, for you.</em></span></li>
+        <li><span><i class="pg">Driver tooltip</i>Go to <b class="ui">Build visual</b> and click <b class="ui">Clustered column chart</b>. Drag <code>Season</code> (Seasons table) into <b class="ui">X-axis</b> and <code>Wins</code> (_Measures &gt; Core) into <b class="ui">Y-axis</b>.<em>Wins in every season, all drivers together.</em></span></li>
+        <li><span><i class="pg">Driver tooltip</i>Drag the corners of the chart until it fills the small page.</span></li>
+        <li><span><i class="pg">Driver tooltip</i><b class="ui">Format visual</b> &gt; <b class="ui">Visual</b> &gt; <b class="ui">Columns</b> &gt; <b class="ui">Color</b> &gt; <b class="ui">fx</b>. Field value, <code>_Measures</code> &gt; <code>Presentation</code> &gt; <code>Wins By Season Colour</code>, <b class="ui">OK</b>.<em>Every column stays red for now: with all drivers together, every season has a champion.</em></span></li>
+        <li><span><i class="pg">Driver tooltip</i><b class="ui">General</b> &gt; <b class="ui">Title</b>. Click the <b class="ui">fx</b> beside <b class="ui">Text</b>. Field value, <code>Tooltip Headline</code>, <b class="ui">OK</b>. In <b class="ui">Subtitle</b>, type <code>Red marks a title year</code>.<em>The title reads All drivers: 1,152 wins from 25,518 starts.</em></span></li>
+        <li><span><i class="pg">Driver tooltip</i>Right-click the <b class="ui">Driver tooltip</b> tab and hide the page.<em>It is a part, not a page to visit. Hidden pages still work as tooltips.</em></span></li>
+        <li><span><i class="pg go">Drivers</i>Go to <b class="ui">Drivers</b> and click the bar chart. <b class="ui">Format visual</b> &gt; <b class="ui">General</b> &gt; <b class="ui">Tooltips</b> &gt; <b class="ui">Options</b>. Set <b class="ui">Type</b> to <b class="ui">Report page</b> and <b class="ui">Page</b> to <b class="ui">Driver tooltip</b>.</span></li>
+        <li><span><i class="pg">Drivers</i>Hover over any bar.<em>Your page appears, filtered to that driver: a sentence about them, their wins season by season, and red for the years they took the title.</em></span></li>
+      </ol>
+      <div class="note"><b>What just happened</b>A tooltip page is an ordinary report page. Hovering hands it the bar's driver as a filter, so everything on it recalculates for that driver, the title included. To use it on every chart that shows drivers, open the tooltip page and drag <code>Driver</code> into <b class="ui">Drag tooltip fields here</b> at the bottom of Build visual: charts with Page left on Auto then pick it up.</div>
+    </div>
+    <figure class="see"><img src="assets/lap-5-tooltip.jpg" alt="The tooltip page filtered to Lewis Hamilton: 105 wins from 380 starts, a column for each season, red in title years"><figcaption>Hovering Lewis Hamilton should show this: your page, filtered to him.</figcaption></figure>
+  </div>
+  <div class="grid" style="margin-top:26px">
+    <div>
+      <h3 class="sub">The race</h3>
+      <p class="muted small" style="margin-bottom:8px">Short of time? Start here: the race does not need the tooltip.</p>
+      <ol class="steps" start="10" style="counter-reset:s 9">
+        <li><span><i class="pg go">The race</i>Go to <b class="ui">The race</b> and click the empty chart that says <i>Select or drag fields to populate this visual</i>.</span></li>
+        <li><span><i class="pg">The race</i>Drag four fields into its wells:<br><code>Driver</code> (Drivers table) into <b class="ui">Values</b><br><code>Starts To Date</code> (_Measures &gt; Race) into <b class="ui">X Axis</b><br><code>Wins To Date</code> (_Measures &gt; Race) into <b class="ui">Y Axis</b><br><code>Season</code> (Seasons table) into <b class="ui">Play Axis</b></span></li>
+        <li><span><i class="pg">The race</i><b class="ui">Format visual</b> &gt; <b class="ui">Visual</b>: switch <b class="ui">Category label</b> on.<em>Each dot gets a name.</em></span></li>
+        <li><span><i class="pg">The race</i><b class="ui">Markers</b> &gt; <b class="ui">Color</b> &gt; <b class="ui">fx</b>. Field value, <code>Race Colour</code>, <b class="ui">OK</b>.</span></li>
+        <li><span><i class="pg">The race</i>Press the <b class="ui">Play</b> button at the bottom left of the chart.<em>Seventeen drivers race from 1950 to 2025. The red dot is whoever holds the record. Watch it change hands six times.</em></span></li>
+        <li><span><i class="pg">The race</i>Click one dot, then press Play again.<em>The chart draws that driver's whole path.</em></span></li>
+      </ol>
+      <details class="fix"><summary>If it looks wrong</summary><ul>
+        <li>No Play button: <code>Season</code> is not in the Play Axis well.</li>
+        <li>Hundreds of dots along the bottom: you used <code>Race Starts</code> and <code>Wins</code>. The two To Date measures only show drivers with 20 or more wins.</li>
+        <li>The tooltip is the usual small list: Page is still Auto. Choose Driver tooltip.</li>
+        <li>Driver tooltip is not in the Page list: <b class="ui">Allow use as tooltip</b> is off. Open the tooltip page, click empty canvas, and repeat step 2. Or choose Backup tooltip for now.</li>
+        <li>The tooltip is cut off or has scroll bars: the chart is bigger than the page. Shrink it to fit (step 4).</li>
+      </ul></details>
+    </div>
+    <figure class="see"><img src="assets/lap-5.jpg" alt="The race page: a scatter chart of career wins against career starts with a play axis along the bottom"><figcaption>You should see this when the animation reaches 2025.</figcaption></figure>
+  </div>
+</div></section>
+
+<section class="lap" id="lap6" data-nav="6 Drill"><div class="wrap">
+  <div class="lap-head"><span class="n">6</span><div><p class="kicker">Extra lap 6</p><h2>Right-click to a driver's page.</h2></div><span class="time">5 MINUTES</span></div>
+  <p class="why">Drill-through lets a reader jump from any driver on any chart to a full page about that driver. The page is already built. One field switches it on.</p>
+  <div class="grid">
+    <div>
+      <ol class="steps">
+        <li><span><i class="pg start">Driver profile</i>Open the hidden page <b class="ui">Driver profile</b> from the tabs at the bottom.</span></li>
+        <li><span><i class="pg">Driver profile</i>Click an empty part of the page. In <b class="ui">Build visual</b>, scroll to <b class="ui">Drill through</b> at the bottom.</span></li>
+        <li><span><i class="pg">Driver profile</i>Drag <code>Driver</code> from the <code>Drivers</code> table onto <b class="ui">Add drill-through fields here</b>.<em>Power BI adds its own back arrow in the top-left corner. Delete it: the page already has a Back button.</em></span></li>
+        <li><span><i class="pg go">Drivers</i>Go to <b class="ui">Drivers</b>. Right-click any bar &gt; <b class="ui">Drill through</b> &gt; <b class="ui">Driver profile</b>.<em>The page opens for that driver only.</em></span></li>
+        <li><span><i class="pg">Driver profile</i>Hold <b class="ui">Ctrl</b> and click <b class="ui">Back</b>.</span></li>
+      </ol>
+      <div class="note"><b>It works everywhere</b>Try it from a dot on The race, or from the scatter chart on Drivers. Any visual that shows a driver now offers the same jump.</div>
+    </div>
+    <figure class="see"><img src="assets/finished-profile.jpg" alt="The Driver profile page showing Lewis Hamilton's career numbers and wins by season"><figcaption>You should see a page like this for the driver you chose.</figcaption></figure>
+  </div>
+</div></section>
+
+<section class="lap" id="lap7" data-nav="7 Bookmarks"><div class="wrap">
+  <div class="lap-head"><span class="n">7</span><div><p class="kicker">Extra lap 7</p><h2>A note that opens and closes.</h2></div><span class="time">8 MINUTES</span></div>
+  <p class="why">A bookmark saves which things on a page are shown and which are hidden. Two bookmarks and two buttons make a note the reader can open when they want the small print. Work on <b class="ui">The story</b>.</p>
+  <div class="grid">
+    <div>
+      <ol class="steps">
+        <li><span><i class="pg start">The story</i>On the ribbon open <b class="ui">View</b> and switch on <b class="ui">Selection</b> and <b class="ui">Bookmarks</b>.<em>Selection lists everything on the page. Three items at the top are hidden: Close button, Open button and Reading note.</em></span></li>
+        <li><span><i class="pg">The story</i>In <b class="ui">Selection</b>, click the eye beside <b class="ui">Reading note</b> and beside <b class="ui">Close button</b> to show them. Leave Open button hidden.</span></li>
+        <li><span><i class="pg">The story</i>In <b class="ui">Bookmarks</b> click <b class="ui">Add</b>. Double-click the new bookmark and name it <code>Note open</code>. Click its <b class="ui">...</b> and untick <b class="ui">Data</b>.<em>Without Data, the bookmark changes what is visible and leaves filters alone.</em></span></li>
+        <li><span><i class="pg">The story</i>Back in <b class="ui">Selection</b>: hide <b class="ui">Reading note</b> and <b class="ui">Close button</b>, show <b class="ui">Open button</b>.</span></li>
+        <li><span><i class="pg">The story</i><b class="ui">Add</b> a second bookmark, name it <code>Note closed</code>, untick <b class="ui">Data</b>.</span></li>
+        <li><span><i class="pg">The story</i>Click the <code>How to read this</code> button on the page. In the format pane open <b class="ui">Action</b> and switch it on. <b class="ui">Type</b>: <b class="ui">Bookmark</b>. <b class="ui">Bookmark</b>: <b class="ui">Note open</b>.</span></li>
+        <li><span><i class="pg">The story</i>Click the <code>Note open</code> bookmark so the other button shows. Click <code>Close the note</code> and give it the action <b class="ui">Bookmark</b> &gt; <b class="ui">Note closed</b>.</span></li>
+        <li><span><i class="pg">The story</i>Hold <b class="ui">Ctrl</b> and click each button to try it.</span></li>
+      </ol>
+      <div class="note"><b>See one that is already built</b>The Chart Clinic page uses the same trick for its Show the verdicts button.</div>
+    </div>
+    <figure class="see"><img src="assets/finished-story.jpg" alt="The finished story page with a How to read this button in the top right corner"><figcaption>You should see the button top right. It opens a dark note over the charts.</figcaption></figure>
+  </div>
+</div></section>
+
+<section class="lap" id="next" data-nav="What next"><div class="wrap">
+  <p class="kicker">What next</p>
+  <h2>Change the story.</h2>
+  <p class="why">You now have a theme, a layout and five techniques that work on any data. Three ways to keep going:</p>
+  <div class="panes">
+    <div><h3>Ask a new question</h3>Which decade was most dangerous? Which driver gained the most places? Build a page for it on <code>race.png</code> or <code>drivers.png</code>.</div>
+    <div><h3>Draw your own layout</h3>Open <code>design/Backgrounds.pptx</code>, move the shapes, export the slide as PNG. Steps are in <code>guides/backgrounds.md</code>.</div>
+    <div><h3>Use your own data</h3>Import the theme into your coursework report first. It is the fastest improvement you can make.</div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  An unofficial teaching pack by Ribesh Maharjan. Data: F1DB, CC BY 4.0. Not associated with Formula 1, the FIA or any team. <a href="index.html">Back to the lecture</a>.
+</div></footer>
+
+<script>
+(function () {
+  var KEY = 'pole-position-workbook-v2', state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+  var nav = document.getElementById('nav'), laps = [].slice.call(document.querySelectorAll('section.lap'));
+  var boxes = [];
+  laps.forEach(function (lap) {
+    var a = document.createElement('a');
+    a.href = '#' + lap.id; a.textContent = lap.dataset.nav; nav.appendChild(a); lap._link = a;
+    [].slice.call(lap.querySelectorAll('ol.steps > li')).forEach(function (li, i) {
+      var id = lap.id + '-' + i + '-' + li.parentNode.getAttribute('start'), box = document.createElement('input');
+      box.type = 'checkbox'; box.checked = !!state[id]; box.setAttribute('aria-label', 'Step done');
+      li.classList.toggle('done', box.checked); li.appendChild(box); boxes.push(box); box._lap = lap;
+      box.addEventListener('change', function () {
+        state[id] = box.checked; li.classList.toggle('done', box.checked);
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        paint();
+      });
+    });
+  });
+  function paint() {
+    var done = boxes.filter(function (b) { return b.checked; }).length;
+    document.getElementById('bar').style.width = (boxes.length ? 100 * done / boxes.length : 0) + '%';
+    document.getElementById('count').textContent = done + ' of ' + boxes.length + ' steps';
+    laps.forEach(function (lap) {
+      var mine = boxes.filter(function (b) { return b._lap === lap; });
+      lap._link.classList.toggle('done', mine.length > 0 && mine.every(function (b) { return b.checked; }));
+    });
+  }
+  paint();
+  if ('IntersectionObserver' in window) {
+    var seen = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { laps.forEach(function (l) { l._link.classList.toggle('on', l === e.target); }); } });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    laps.forEach(function (l) { seen.observe(l); });
+  }
+})();
+</script>
+</body>
+</html>

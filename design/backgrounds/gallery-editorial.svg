@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs></defs>
+  <rect id="page" width="1280" height="720" fill="#F6F3EC"/>
+  <rect id="top-stripe" x="0" y="0" width="1280" height="6" fill="#E10600"/>
+  <rect id="kpi-1" x="40" y="168" width="250" height="100" rx="10" fill="#FFFFFF"/>
+  <rect id="kpi-2" x="306" y="168" width="250" height="100" rx="10" fill="#FFFFFF"/>
+  <rect id="kpi-3" x="572" y="168" width="250" height="100" rx="10" fill="#FFFFFF"/>
+  <rect id="kpi-1-mark" x="56" y="186" width="4" height="64" fill="#15151A"/>
+  <rect id="kpi-2-mark" x="322" y="186" width="4" height="64" fill="#E10600"/>
+  <rect id="kpi-3-mark" x="588" y="186" width="4" height="64" fill="#15151A"/>
+  <rect id="main-panel" x="40" y="284" width="782" height="396" rx="10" fill="#FFFFFF"/>
+  <rect id="side-panel-1" x="838" y="168" width="402" height="248" rx="10" fill="#FFFFFF"/>
+  <rect id="side-panel-2" x="838" y="432" width="402" height="248" rx="10" fill="#FFFFFF"/>
+</svg>

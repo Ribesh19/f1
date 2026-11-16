@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs></defs>
+  <rect id="page" width="1280" height="720" fill="#F4F1EA"/>
+  <rect id="rail" x="0" y="0" width="208" height="720" fill="#15151A"/>
+  <rect id="brand-mark" x="24" y="30" width="5" height="44" fill="#E10600"/>
+  <rect id="header-rule" x="232" y="108" width="1024" height="2" fill="#E10600"/>
+  <rect id="nav-active" x="16" y="187" width="176" height="40" rx="8" fill="#E10600"/>
+  <g id="icon-flag" transform="translate(30 150) scale(0.75)" fill="none" stroke="#8E8A80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5,21 5,4"/><polyline points="5,4 19,4 16,9 19,14 5,14"/></g>
+  <g id="icon-driver" transform="translate(30 198) scale(0.75)" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><polyline points="5,21 6,17 9,15 15,15 18,17 19,21"/></g>
+  <g id="icon-play" transform="translate(30 246) scale(0.75)" fill="none" stroke="#8E8A80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,5 19,12 8,19 8,5"/></g>
+  <g id="icon-chart" transform="translate(30 294) scale(0.75)" fill="none" stroke="#8E8A80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,20 6,12"/><polyline points="12,20 12,5"/><polyline points="18,20 18,9"/></g>
+  <g id="icon-info" transform="translate(30 342) scale(0.75)" fill="none" stroke="#8E8A80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,11 12,16"/><circle cx="12" cy="8" r="0.9"/></g>
+  <rect id="fact-1" x="232" y="128" width="192" height="120" rx="10" fill="#FFFFFF"/>
+  <rect id="fact-2" x="440" y="128" width="192" height="120" rx="10" fill="#FFFFFF"/>
+  <rect id="fact-3" x="648" y="128" width="192" height="120" rx="10" fill="#FFFFFF"/>
+  <rect id="fact-4" x="856" y="128" width="192" height="120" rx="10" fill="#FFFFFF"/>
+  <rect id="fact-5" x="1064" y="128" width="192" height="120" rx="10" fill="#FFFFFF"/>
+  <rect id="seasons-panel" x="232" y="264" width="608" height="432" rx="10" fill="#FFFFFF"/>
+  <rect id="record-panel" x="856" y="264" width="400" height="432" rx="10" fill="#FFFFFF"/>
+</svg>

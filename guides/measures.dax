@@ -1,0 +1,128 @@
+// Pole Position: every measure in the report.
+// Paste any of these into Power BI with Modeling > New measure.
+
+// ---- Core ----
+
+Race Starts = COUNTROWS(Results)
+
+Races Held = DISTINCTCOUNT(Results[RaceKey])
+
+Wins = SUM(Results[IsWin])
+
+Podiums = SUM(Results[IsPodium])
+
+Poles = SUM(Results[IsPole])
+
+Fastest Laps = SUM(Results[IsFastestLap])
+
+Points = SUM(Results[Points Scored])
+
+Win Rate = DIVIDE([Wins], [Race Starts])
+
+Podium Rate = DIVIDE([Podiums], [Race Starts])
+
+DNF Rate = DIVIDE(CALCULATE(COUNTROWS(Results), Results[Result] IN {"Accident", "Mechanical"}), [Race Starts])
+
+Drivers = DISTINCTCOUNT(Results[DriverKey])
+
+Race Winners = CALCULATE(DISTINCTCOUNT(Results[DriverKey]), Results[IsWin] = 1)
+
+Champions = DISTINCTCOUNT(Seasons[ChampionDriverKey])
+
+Titles = CALCULATE(COUNTROWS(Seasons), TREATAS(VALUES(Drivers[DriverKey]), Seasons[ChampionDriverKey]))
+
+// ---- Story ----
+
+Positions Gained = AVERAGEX(FILTER(Results, NOT ISBLANK(Results[Finish Position]) && NOT ISBLANK(Results[Grid Position])), Results[Grid Position] - Results[Finish Position])
+
+Wins From Pole % = DIVIDE(CALCULATE([Wins], Results[IsPole] = 1), [Wins])
+
+Season Dominance % =
+AVERAGEX(
+    VALUES(Seasons[Season]),
+    VAR ChampionKey = CALCULATE(MAX(Seasons[ChampionDriverKey]))
+    RETURN
+        DIVIDE(
+            CALCULATE(SUM(Results[IsWin]), REMOVEFILTERS(Drivers), Results[DriverKey] = ChampionKey),
+            CALCULATE(DISTINCTCOUNT(Results[RaceKey]), REMOVEFILTERS(Drivers))
+        )
+)
+
+Champion = LOOKUPVALUE(Drivers[Driver], Drivers[DriverKey], SELECTEDVALUE(Seasons[ChampionDriverKey]))
+
+Finish Rate = DIVIDE(CALCULATE(COUNTROWS(Results), Results[Result] = "Finished"), [Race Starts])
+
+Mechanical Failure Rate = DIVIDE(CALCULATE(COUNTROWS(Results), Results[Result] = "Mechanical"), [Race Starts])
+
+Accident Rate = DIVIDE(CALCULATE(COUNTROWS(Results), Results[Result] = "Accident"), [Race Starts])
+
+Wins (Top 10) =
+VAR DriverWins = [Wins]
+VAR Position = RANKX(ALLSELECTED(Drivers[Driver]), [Wins], , DESC, SKIP)
+RETURN IF(Position <= 10 && DriverWins > 0, DriverWins)
+
+Career Wins = VAR DriverWins = [Wins] RETURN IF(DriverWins > 0, DriverWins)
+
+// ---- Presentation ----
+
+Title Text =
+VAR Decade = SELECTEDVALUE(Seasons[Decade])
+VAR Leader = TOPN(1, ADDCOLUMNS(ALL(Drivers[Driver]), "@Wins", [Wins]), [@Wins], DESC, Drivers[Driver], ASC)
+VAR LeaderName = MAXX(Leader, Drivers[Driver])
+VAR LeaderWins = MAXX(Leader, [@Wins])
+RETURN
+    LeaderName & " won " & LeaderWins & " races" & IF(ISBLANK(Decade), ". Nobody has won more.", " in the " & Decade & ".")
+
+Subtitle Text = FORMAT([Races Held], "#,0") & " races  |  " & FORMAT([Drivers], "#,0") & " drivers  |  " & MIN(Races[Season]) & " to " & MAX(Races[Season])
+
+Bar Colour =
+VAR Best = MAXX(ALLSELECTED(Drivers[Driver]), [Wins])
+RETURN IF([Wins] = Best, "#E10600", "#B9B4A7")
+
+Tooltip Headline = SELECTEDVALUE(Drivers[Driver], "All drivers") & ": " & FORMAT([Wins], "#,0") & " wins from " & FORMAT([Race Starts], "#,0") & " starts"
+
+Decade Colour = IF(SELECTEDVALUE(Seasons[Decade]) = "2020s", "#E10600", "#B9B4A7")
+
+Wins By Season Colour = IF([Titles] > 0, "#E10600", "#B9B4A7")
+
+// ---- The race (play axis) and the driver profile ----
+
+// Wins up to the season on the play axis. Only drivers with 20 or more career wins.
+Wins To Date =
+    VAR LastSeason = MAX(Seasons[Season])
+    VAR Career = CALCULATE([Wins], REMOVEFILTERS(Seasons))
+    VAR Started = CALCULATE([Race Starts], REMOVEFILTERS(Seasons), Seasons[Season] <= LastSeason)
+    VAR ToDate = CALCULATE([Wins], REMOVEFILTERS(Seasons), Seasons[Season] <= LastSeason)
+    RETURN IF(Career >= 20 && Started > 0, ToDate + 0)
+
+// Race starts up to the season on the play axis. Only drivers with 20 or more career wins.
+Starts To Date =
+    VAR LastSeason = MAX(Seasons[Season])
+    VAR Career = CALCULATE([Wins], REMOVEFILTERS(Seasons))
+    VAR Started = CALCULATE([Race Starts], REMOVEFILTERS(Seasons), Seasons[Season] <= LastSeason)
+    RETURN IF(Career >= 20 && Started > 0, Started)
+
+// Red for the driver with the most wins so far, dark for the rest. Use in conditional formatting.
+Race Colour =
+    VAR Mine = [Wins To Date]
+    VAR Best = MAXX(ALL(Drivers[Driver]), [Wins To Date])
+    RETURN IF(Mine = Best && Mine > 0, "#E10600", "#15151A")
+
+// First season in which the driver started a race.
+First Season = MINX(Results, RELATED(Races[Season]))
+
+// Most recent season in which the driver started a race.
+Last Season = MAXX(Results, RELATED(Races[Season]))
+
+// The driver the page was drilled through to.
+Profile Name = SELECTEDVALUE(Drivers[Driver], "Right-click a driver, then choose Drill through")
+
+// One line of career facts for the drill-through page.
+Profile Summary =
+    VAR Titles = [Titles] + 0
+    RETURN
+        IF(
+            HASONEVALUE(Drivers[Driver]),
+            [First Season] & " to " & [Last Season] & "   |   " & FORMAT([Race Starts], "#,0") & " starts   |   " & Titles & IF(Titles = 1, " world title", " world titles"),
+            "All drivers, " & MIN(Races[Season]) & " to " & MAX(Races[Season])
+        )

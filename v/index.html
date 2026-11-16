@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vote: Dashboard design in Power BI</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--ink:#15151A;--paper:#F4F1EA;--red:#E10600;--muted:#6B675E;--grey:#B9B4A7;--line:#DDD8CC;--card:#fff;
+  --serif:Georgia,"Times New Roman",serif;--sans:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.45;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+header{background:var(--ink);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.08em}
+header i{width:4px;height:18px;background:var(--red);display:block}
+header span{margin-left:auto;font-weight:600;letter-spacing:0;color:var(--grey);font-size:13px}
+header span.bad{color:#ff8a80}
+main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:22px 18px 28px;display:flex;flex-direction:column;gap:16px}
+.kicker{margin:0;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+h1{font-family:var(--serif);font-size:clamp(24px,6.4vw,32px);line-height:1.15;margin:0;text-wrap:balance}
+p{margin:0}
+.muted{color:var(--muted)}
+#opts{display:grid;gap:10px}
+#opts button{font:inherit;font-weight:600;text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:16px 18px;min-height:58px;cursor:pointer;display:flex;align-items:center;gap:12px;-webkit-tap-highlight-color:transparent}
+#opts button::before{content:"";flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--grey)}
+#opts button[aria-pressed=true]{border-color:var(--red);background:#fff}
+#opts button[aria-pressed=true]::before{border-color:var(--red);background:var(--red);box-shadow:inset 0 0 0 4px #fff}
+#opts button:disabled{opacity:.55;cursor:default}
+#opts button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+#note{min-height:1.5em;font-size:16px}
+#note.ok{color:var(--ink);font-weight:600}
+.wait{margin:auto 0;display:grid;gap:14px;text-align:center;justify-items:center}
+.wait h1{font-size:clamp(26px,7vw,34px)}
+.pulse{width:14px;height:14px;border-radius:50%;background:var(--red);animation:p 1.6s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+footer{padding:14px 18px 20px;text-align:center;font-size:14px;color:var(--muted)}
+footer a{color:inherit;font-weight:600}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><i></i>POLE POSITION · VOTE<span id="net">Connecting</span></header>
+<main>
+  <section class="wait" id="wait">
+    <div class="pulse" aria-hidden="true"></div>
+    <h1 id="waitHead">You are in.</h1>
+    <p class="muted" id="waitText">Keep this page open and watch the big screen. Each question appears here by itself.</p>
+  </section>
+  <section id="ask" hidden style="display:grid;gap:16px">
+    <p class="kicker" id="kick">Vote now</p>
+    <h1 id="q"></h1>
+    <div id="opts" role="group" aria-labelledby="q"></div>
+    <p id="note" class="muted" aria-live="polite"></p>
+  </section>
+</main>
+<footer>Slides and files: <a href="../">ribesh19.github.io/f1</a></footer>
+<script src="../vote.js"></script>
+<script>
+(function () {
+  'use strict';
+  var V = window.PPVote, $ = function (s) { return document.querySelector(s); };
+  var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode: keep going */ } } };
+  function uuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
+  }
+  var voter = store.get('pp-voter');
+  if (!/^[0-9a-f-]{36}$/.test(voter || '')) { voter = uuid(); store.set('pp-voter', voter); }
+  var mine = {};
+  try { mine = JSON.parse(store.get('pp-mine') || '{}') || {}; } catch (e) { mine = {}; }
+
+  var shown = null, state = null, fails = 0, busy = false, timer = 0;
+
+  function label(poll, key) {
+    var hit = V.POLLS[poll].o.filter(function (o) { return o[0] === key; })[0];
+    return hit ? hit[1] : key;
+  }
+  function draw() {
+    var s = state, poll = s && s.poll && V.POLLS[s.poll] ? s.poll : null;
+    var key = poll ? poll + '@' + s.epoch : null, pick = key ? mine[key] : null;
+    if (!poll || (!s.open && !pick)) {            // nothing to answer
+      $('#ask').hidden = true; $('#wait').hidden = false; shown = null;
+      $('#waitHead').textContent = 'You are in.';
+      $('#waitText').textContent = 'Keep this page open and watch the big screen. Each question appears here by itself.';
+      return;
+    }
+    $('#wait').hidden = true; $('#ask').hidden = false;
+    if (shown !== key) {                          // a new question: build its buttons once
+      shown = key;
+      $('#q').textContent = V.POLLS[poll].q;
+      var box = $('#opts'); box.innerHTML = '';
+      V.POLLS[poll].o.forEach(function (o) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.textContent = o[1]; b.dataset.key = o[0];
+        b.onclick = function () { cast(poll, key, o[0]); };
+        box.appendChild(b);
+      });
+    }
+    $('#kick').textContent = s.open ? 'Vote now' : 'Voting closed';
+    [].forEach.call(document.querySelectorAll('#opts button'), function (b) {
+      b.setAttribute('aria-pressed', b.dataset.key === pick ? 'true' : 'false');
+      b.disabled = !s.open || busy;
+    });
+    var note = $('#note');
+    if (pick) { note.className = 'ok'; note.textContent = 'Your vote: ' + label(poll, pick) + '.' + (s.open ? ' Tap another to change it.' : ' Look at the big screen for the result.'); }
+    else { note.className = 'muted'; note.textContent = 'Tap one. You can change your mind until the question closes.'; }
+  }
+  function cast(poll, key, choice) {
+    if (busy) return;
+    busy = true; var before = mine[key];
+    mine[key] = choice; draw();
+    V.vote(poll, voter, choice).then(function (r) {
+      busy = false;
+      if (r && r.ok) { store.set('pp-mine', JSON.stringify(mine)); }
+      else {
+        if (before) mine[key] = before; else delete mine[key];
+        $('#note').className = 'muted';
+        draw();
+        $('#note').textContent = r && r.why === 'closed' ? 'That question has just closed.' : 'That did not go through. Tap again.';
+        return;
+      }
+      draw();
+    });
+  }
+  function tick() {
+    clearTimeout(timer);
+    if (document.hidden) return;
+    V.get().then(function (s) {
+      if (s) { fails = 0; state = s; $('#net').textContent = 'Live'; $('#net').className = ''; draw(); }
+      else if (++fails >= 2) { $('#net').textContent = 'Reconnecting'; $('#net').className = 'bad'; }
+      timer = setTimeout(tick, 2300 + Math.random() * 900);   // jitter spreads a room of phones out
+    });
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });
+  window.addEventListener('online', tick);
+  tick();
+})();
+</script>
+</body>
+</html>
