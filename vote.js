@@ -7,13 +7,15 @@ window.PPVote = (function () {
   var KEY = 'sb_publishable_S8OivP16rcLBX6HvDnjh6Q_BdyGdlAJ';
   var SHORT = 'ribesh19.github.io/f1';
   var CHARTS = [['A', 'A  Bar chart'], ['B', 'B  Column chart'], ['C', 'C  Line chart'], ['D', 'D  Donut chart'], ['E', 'E  Table'], ['F', 'F  Treemap']];
-  var FOUND = [['yes', 'Yes, I found it'], ['no', 'No, not in time']];
+  var FOUND = [['48', '48%'], ['55', '55%'], ['64', '64%'], ['88', '88%'], ['x', 'I could not find it']];
+  var STEPS = [];
+  for (var g = 0; g <= 100; g += 5) STEPS.push([String(g), g + '%']);
   // id: question, options as [key, label]. The keys must match the pp_polls table.
   var POLLS = {
     warm: { q: 'Have you used Power BI before?', o: [['never', 'Never'], ['little', 'A little'], ['often', 'Regularly']] },
-    guess: { q: 'In the 1980s, how many F1 cars that started a race finished it?', o: [['a', 'Under 40%'], ['b', '40 to 59%'], ['c', '60 to 79%'], ['d', '80% or more']] },
-    find1: { q: 'The plain report: did you find how many cars finish today?', o: FOUND },
-    find2: { q: 'The designed report: did you find how many cars finish today?', o: FOUND },
+    guess: { q: 'In the 1980s, how many F1 cars that started a race finished it?', type: 'slider', o: STEPS },
+    find1: { q: 'From the plain report: how many F1 cars finish the race today?', o: FOUND },
+    find2: { q: 'From the designed report: how many F1 cars finish the race today?', o: FOUND },
     chart1: { q: 'Who has won the most races? Pick the chart that answers it fastest.', o: CHARTS },
     chart2: { q: 'Has Formula 1 become more reliable? Pick the chart.', o: CHARTS },
     chart3: { q: 'How many races did Alain Prost win? Pick the chart.', o: CHARTS },

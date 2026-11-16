@@ -27,6 +27,11 @@ p{margin:0}
 #opts button[aria-pressed=true]::before{border-color:var(--red);background:var(--red);box-shadow:inset 0 0 0 4px #fff}
 #opts button:disabled{opacity:.55;cursor:default}
 #opts button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+#opts output{font-family:var(--serif);font-size:72px;line-height:1;text-align:center;display:block;margin:6px 0 2px}
+#opts input[type=range]{width:100%;height:44px;accent-color:var(--red);margin:0}
+#opts .ends{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-top:-6px}
+#opts button.send{justify-content:center;background:var(--ink);color:#fff;border-color:var(--ink);text-align:center}
+#opts button.send::before{display:none}
 #note{min-height:1.5em;font-size:16px}
 #note.ok{color:var(--ink);font-weight:600}
 .wait{margin:auto 0;display:grid;gap:14px;text-align:center;justify-items:center}
@@ -92,7 +97,15 @@ footer a{color:inherit;font-weight:600}
       shown = key;
       $('#q').textContent = V.POLLS[poll].q;
       var box = $('#opts'); box.innerHTML = '';
-      V.POLLS[poll].o.forEach(function (o) {
+      if (V.POLLS[poll].type === 'slider') {       // a number question: slide, then send
+        var start = pick || '50';
+        box.innerHTML = '<output id="sv">' + start + '%</output><input type="range" id="sr" min="0" max="100" step="5" value="' + start +
+          '" aria-label="Your guess, as a percentage"><div class="ends"><span>0%</span><span>100%</span></div>' +
+          '<button type="button" class="send" id="send">Send my guess</button>';
+        $('#sr').oninput = function () { $('#sv').textContent = this.value + '%'; };
+        $('#send').onclick = function () { cast(poll, key, $('#sr').value); };
+      }
+      else V.POLLS[poll].o.forEach(function (o) {
         var b = document.createElement('button');
         b.type = 'button'; b.textContent = o[1]; b.dataset.key = o[0];
         b.onclick = function () { cast(poll, key, o[0]); };
@@ -104,9 +117,11 @@ footer a{color:inherit;font-weight:600}
       b.setAttribute('aria-pressed', b.dataset.key === pick ? 'true' : 'false');
       b.disabled = !s.open || busy;
     });
+    var slider = V.POLLS[poll].type === 'slider';
+    if (slider) { $('#sr').disabled = !s.open; $('#send').textContent = pick ? 'Change my guess' : 'Send my guess'; }
     var note = $('#note');
-    if (pick) { note.className = 'ok'; note.textContent = 'Your vote: ' + label(poll, pick) + '.' + (s.open ? ' Tap another to change it.' : ' Look at the big screen for the result.'); }
-    else { note.className = 'muted'; note.textContent = 'Tap one. You can change your mind until the question closes.'; }
+    if (pick) { note.className = 'ok'; note.textContent = 'Your ' + (slider ? 'guess' : 'vote') + ': ' + label(poll, pick) + '.' + (s.open ? (slider ? ' Slide and send again to change it.' : ' Tap another to change it.') : ' Look at the big screen for the result.'); }
+    else { note.className = 'muted'; note.textContent = slider ? 'Slide to your guess, then send it.' : 'Tap one. You can change your mind until the question closes.'; }
   }
   function cast(poll, key, choice) {
     if (busy) return;

@@ -133,7 +133,10 @@ input[type=range]{width:100%;max-width:min(1000px,calc((100vh - 340px)*16/9));ac
 
 /* five second test */
 #flash{position:relative;aspect-ratio:16/9;max-width:min(820px,calc((100vh - 380px)*16/9));width:100%;border-radius:12px;overflow:hidden;background:#22222a;display:grid;place-items:center;color:#fff;text-align:center}
-body.host #flash{max-width:min(820px,calc((100vh - 450px)*16/9))}
+.flashrow{display:grid;gap:32px;align-items:center}
+.flashcol{display:grid;gap:14px}
+body.host .flashrow{grid-template-columns:min(820px,calc((100vh - 430px)*16/9)) minmax(260px,1fr)}
+@media (max-width:1000px){body.host .flashrow{grid-template-columns:1fr}}
 #flash img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
 #flash.showing img{opacity:1}
 #flash .count{position:absolute;right:12px;top:12px;background:var(--red);border-radius:50%;width:46px;height:46px;display:none;place-items:center;font-weight:700;font-size:20px}
@@ -258,22 +261,37 @@ code{font-family:var(--mono);font-size:.92em;background:rgba(127,127,127,.16);pa
 .getit .addr{font-family:var(--mono);font-size:19px;font-weight:700}
 .getit ul{margin:0;padding-left:18px}
 .getit a{color:inherit;font-weight:600;text-decoration-color:var(--red);text-underline-offset:3px}
-.live{display:none;gap:7px;font-size:15px}
+/* The room's vote: one block, named, with bars and numbers large enough to read from the back row */
+.live{display:none;gap:10px;font-size:17px;border-left:5px solid var(--red);padding:2px 0 2px 16px}
 body.host .live{display:grid}
 body.host .nohost{display:none}
-.live .lh{display:flex;gap:14px;justify-content:space-between;align-items:baseline;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.live .lh b{color:var(--red);text-transform:none;letter-spacing:0;font-family:var(--mono);font-size:14px}
-.live .rows{display:grid;gap:7px}
-.lrow{display:grid;grid-template-columns:minmax(90px,170px) 1fr 46px;grid-template-areas:"l b p";gap:10px;align-items:center}
-.lrow .l{grid-area:l}.lrow .p{grid-area:p;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
-.lrow .bar{grid-area:b;height:18px;background:rgba(127,127,127,.2);border-radius:3px;overflow:hidden}
+.live .lh{display:flex;gap:16px;justify-content:space-between;align-items:baseline;flex-wrap:wrap}
+.live .lh strong{font-family:var(--serif);font-size:22px;line-height:1.1}
+.live .lh span{font-size:14px;color:var(--muted)}
+.live .lh b{font-family:var(--mono);font-weight:700;color:var(--red)}
+.live .sub{font-size:15px;color:var(--muted);margin-top:-6px}
+.live .rows{display:grid;gap:9px}
+.lrow{display:grid;grid-template-columns:minmax(110px,200px) 1fr 70px;grid-template-areas:"l b p";gap:12px;align-items:center}
+.lrow .l{grid-area:l;font-weight:600}
+.lrow .p{grid-area:p;font-family:var(--serif);font-weight:700;font-size:26px;line-height:1;text-align:right;font-variant-numeric:tabular-nums}
+.lrow .bar{grid-area:b;height:26px;background:rgba(127,127,127,.2);border-radius:4px;overflow:hidden}
 .lrow .bar i{display:block;height:100%;background:var(--grey)}
 .lrow.top .bar i{background:var(--red)}
-.live.h .rows{grid-template-columns:repeat(4,1fr);gap:16px}
-.live.h .lrow{grid-template-columns:1fr auto;grid-template-areas:"l p" "b b";gap:3px 8px}
-.slide.dark .live .lh{color:#b9b4a7}
-.pick .votes{position:absolute;right:10px;top:8px;font-size:13px;font-weight:700;color:var(--red)}
-.fv{font-style:normal;color:var(--red);font-weight:700;margin-left:8px;font-family:var(--sans)}
+.lrow.top .p{color:var(--red)}
+.live.h .rows{grid-template-columns:repeat(4,1fr);gap:18px}
+.live.h .lrow{grid-template-columns:1fr auto;grid-template-areas:"l p" "b b";gap:4px 8px;align-items:end}
+.live.h .lrow .bar{height:16px}
+.slide.dark .live .lh span,.slide.dark .live .sub{color:#b9b4a7}
+/* On a tile: a labelled badge and a bar along the top edge, so a share is never a stray number */
+.pick .votes{display:none;position:absolute;right:8px;top:7px;font-size:15px;font-weight:700;line-height:1;background:var(--ink);color:#fff;border-radius:6px;padding:5px 9px}
+.pick .votes.on{display:block}
+.pick .votes.lead{background:var(--red)}
+.pick .votes small{font-size:11px;font-weight:600;margin-right:5px;opacity:.85}
+.pick .vbar{position:absolute;left:0;top:0;height:6px;width:0;background:var(--ink);border-radius:10px 0 0 0}
+.pick .vbar.lead{background:var(--red)}
+.fv{display:inline-block;font-style:normal;font-family:var(--sans);font-size:14px;font-weight:700;line-height:1;background:#fff;color:var(--ink);border-radius:5px;padding:4px 7px;margin-left:9px;vertical-align:2px}
+.fv:empty{display:none}
+.fv.lead{background:var(--red);color:#fff}
 #voteStat{font-size:13px;color:#b9b4a7;cursor:pointer}
 #voteStat.bad{color:#ff8a80}
 .feature{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start}
@@ -412,7 +430,8 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
   <h2>In the 1980s, how many F1 cars that started a race finished it?</h2>
   <div class="two">
     <div style="display:grid;gap:14px">
-      <p class="lede">Vote on your phone, or drag to your guess on your own screen.</p>
+      <p class="lede">Send your guess from your phone. The number below is the room's average.</p>
+      <p class="muted small" id="guessWho" style="margin-bottom:-8px">Your guess</p>
       <output id="guessOut" for="guessIn" style="font-family:var(--serif);font-size:72px;line-height:1">70%</output>
       <input type="range" id="guessIn" min="0" max="100" value="70" aria-label="Your guess, as a percentage">
       <div class="row"><button class="btn red" id="guessGo" type="button">Lock it in</button><button class="btn ghost" id="guessNow" type="button" hidden>And today?</button></div>
@@ -420,7 +439,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
     <div class="demo" id="guessDemo" aria-live="polite"></div>
   </div>
   <div class="live h" data-live="guess"></div>
-  <p class="notes">The question is on their phones: give it ten seconds, until the slide says the votes are in. You make a guess too, out loud: "I would have said about 70." Then lock it in: that also reveals how the room voted, with the right band in red. No volunteer needed. Then press "And today?".</p>
+  <p class="notes">Each phone has a slider. As guesses arrive the big number becomes the room's average and moves by itself: read it out ("the room says 62"). Then lock it in: the room's guess is drawn against the real 48%, and the strip underneath shows how the guesses were spread, with the right band in red. With no votes the slider is yours to drag, as before. Then press "And today?".</p>
 </section>
 
 <section class="slide" data-title="Same data, two reports">
@@ -439,18 +458,22 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 <section class="slide dark" data-title="The ten-second test" data-poll-dyn="find">
   <p class="kicker">Try it</p>
   <h2>You get ten seconds.</h2>
-  <p class="lede">Find the answer to one question: <b>how many F1 cars finish the race today?</b></p>
-  <div id="flash">
-    <img src="assets/finished-story.jpg" alt="A dashboard shown briefly for the ten-second test">
-    <span class="count" aria-hidden="true">10</span>
-    <div class="msg"><p style="max-width:none">Ten seconds on the clock. Look for the answer.</p></div>
+  <p class="lede">Find the answer to one question: <b>how many F1 cars finish the race today?</b> Pick it on your phone.</p>
+  <div class="flashrow">
+    <div class="flashcol">
+      <div id="flash">
+        <img src="assets/finished-story.jpg" alt="A dashboard shown briefly for the ten-second test">
+        <span class="count" aria-hidden="true">10</span>
+        <div class="msg"><p style="max-width:none">Ten seconds on the clock. Look for the answer.</p></div>
+      </div>
+      <div class="row">
+        <button class="btn red" id="flashPlain" type="button">Show the plain one</button>
+        <button class="btn ghost" id="flashGo" type="button">Show the designed one</button>
+      </div>
+    </div>
+    <div class="live" data-live="find"></div>
   </div>
-  <div class="row">
-    <button class="btn red" id="flashPlain" type="button">Show the plain one</button>
-    <button class="btn ghost" id="flashGo" type="button">Show the designed one</button>
-    <div class="live" data-live="find" style="flex:1;min-width:280px;max-width:460px"></div>
-  </div>
-  <p class="notes">Read the question out first so they know what to look for. They saw 88% two slides ago, and still will not find it on the plain report: that is the point. Run the plain one first, then the designed one: the slide gives the answer each time, so nobody has to speak. Each button also asks the phones "did you find it?", and the two bars beside the buttons fill in: the gap between them is the argument for design.</p>
+  <p class="notes">Read the question out first so they know what to look for. They saw 88% two slides ago, and still will not find it on the plain report: that is the point. Run the plain one first, then the designed one: the slide gives the answer each time, so nobody has to speak. Each button puts the same five answers on the phones (48%, 55%, 64%, 88%, could not find it). The two bars beside the buttons show how many picked the right one, 88%, from each report: show the plain one, let them answer, then the designed one, and compare. The gap between the bars is the argument for design.</p>
 </section>
 
 <section class="slide dark" data-title="What is data storytelling?" id="trio">
@@ -1070,8 +1093,9 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
 
   /* ---- guess game ---- */
   const gIn = $('#guessIn'), gOut = $('#guessOut');
+  let guessLabel = 'Your guess';  // becomes the room's average once phone guesses arrive
   function drawGuess(stage) {
-    const guess = Number(gIn.value), rows = [['Your guess', guess, GREY]];
+    const guess = Number(gIn.value), rows = [[guessLabel, guess, GREY]];
     if (stage >= 1) rows.push(['1980s, actual', 48, INK]);
     if (stage >= 2) rows.push(['2020s, actual', 88, RED]);
     const line = stage === 0 ? 'No peeking.' : stage === 1
@@ -1422,10 +1446,29 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
       return null;
     }
     const revealed = poll => poll === 'guess' ? guessStage >= 1 : true;
-    const bestOf = poll => poll === 'guess' ? 'b' : null;
+    const bestOf = () => null;
+    // Number guesses, kept as [value, count]; anything that is not a number is ignored.
+    const guesses = () => Object.entries(tallies.guess || {}).map(([k, c]) => [Number(k), c]).filter(([v]) => Number.isFinite(v));
+    const BANDS = [['Under 40%', 0, 39], ['40 to 59%', 40, 59], ['60 to 79%', 60, 79], ['80% or more', 80, 100]];
+    function bands() {
+      const g = guesses(), n = g.reduce((a, [, c]) => a + c, 0);
+      return '<div class="rows">' + BANDS.map(([lab, lo, hi]) => {
+        const c = g.filter(([v]) => v >= lo && v <= hi).reduce((a, [, k]) => a + k, 0);
+        return `<div class="lrow${lo === 40 ? ' top' : ''}"><span class="l">${lab}</span><div class="bar"><i style="width:${pct(c, n)}%"></i></div><span class="p">${pct(c, n)}%</span></div>`;
+      }).join('') + '</div>';
+    }
+    // The room's average guess drives the big number and the slider on the guess slide.
+    function roomGuess() {
+      const g = guesses(), n = g.reduce((a, [, c]) => a + c, 0);
+      if (!n) { if (guessLabel !== 'Your guess') { guessLabel = 'Your guess'; $('#guessWho').textContent = guessLabel; drawGuess(guessStage); } return; }
+      const avg = Math.round(g.reduce((a, [v, c]) => a + v * c, 0) / n);
+      if (guessLabel === "The room's guess" && Number(gIn.value) === avg) return;
+      guessLabel = "The room's guess"; $('#guessWho').textContent = "The room's average guess";
+      gIn.value = avg; gOut.textContent = avg + '%'; drawGuess(guessStage);
+    }
     const pct = (c, n) => n ? Math.round(c / n * 100) : 0;
     // Results are shown as percentages only: a raw count would look thin in a small room.
-    const head = n => `<div class="lh"><span>Vote at <b>${V.SHORT}/v</b></span><span>${n ? 'Votes are in' : 'Waiting for votes'}</span></div>`;
+    const head = (n, what) => `<div class="lh"><strong>${what || "The room's vote"}</strong><span>${n ? 'Votes are in.' : 'Waiting for votes.'} Vote at <b>${V.SHORT}/v</b></span></div>`;
     function rows(poll) {
       const t = tallies[poll] || {}, n = total(t), top = Math.max(0, ...Object.values(t)), best = bestOf(poll);
       return '<div class="rows">' + V.POLLS[poll].o.map(([k, lab]) => {
@@ -1434,7 +1477,7 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
       }).join('') + '</div>';
     }
     function found(poll, name, hot) {
-      const t = tallies[poll] || {}, n = total(t), p = pct(t.yes || 0, n);
+      const t = tallies[poll] || {}, n = total(t), p = pct(t['88'] || 0, n);  // 88% is the right answer
       return `<div class="lrow${hot ? ' top' : ''}"><span class="l">${name}</span><div class="bar"><i style="width:${p}%"></i></div><span class="p">${n ? p + '%' : ''}</span></div>`;
     }
     function paint() {
@@ -1442,26 +1485,31 @@ footer{font-size:13px;color:var(--muted);padding:22px clamp(20px,9vw,140px)}
       $$('.live').forEach(box => {
         const id = box.dataset.live;
         if (id === 'find') {
-          box.innerHTML = head(total(tallies[flashPoll || 'find1'])) + '<span class="muted small">Found the answer in ten seconds</span><div class="rows">' +
-            found('find1', 'Plain report', false) + found('find2', 'Designed report', true) + '</div>';
+          box.innerHTML = head(total(tallies[flashPoll || 'find1'])) + '<span class="sub">Share who picked the right answer, 88%</span><div class="rows">' +
+            found('find1', 'From the plain report', false) + found('find2', 'From the designed report', true) + '</div>';
         } else if (box.hasAttribute('data-headonly')) {
-          box.innerHTML = head(total(tallies[id]));
+          box.innerHTML = head(total(tallies[id]), "The room's vote: which will you use first?") + '<span class="sub">The share of the room that picked each one is shown beside its name.</span>';
         } else {
-          box.innerHTML = head(total(tallies[id])) + (revealed(id) ? rows(id) : '<span class="muted small">The split appears when the answer is revealed.</span>');
+          box.innerHTML = head(total(tallies[id]), id === 'guess' ? 'How the room guessed' : '') + (!revealed(id) ? '<span class="sub">The split appears when the answer is revealed.</span>' : id === 'guess' ? bands() : rows(id));
         }
       });
       $$('[data-tiles]').forEach(box => {
         const id = box.dataset.tiles, tt = tallies[id] || {}, n = total(tt), shown = box.classList.contains('revealed');
+        const lead = Math.max(0, ...Object.values(tt));
         $$('.pick', box).forEach(tile => {
-          const c = tt[tile.dataset.key] || 0, tag = $('.votes', tile);
-          if (tag) tag.textContent = shown && n ? `${pct(c, n)}%` : '';
+          const c = tt[tile.dataset.key] || 0, tag = $('.votes', tile), on = shown && n > 0, top = on && c > 0 && c === lead;
+          let bar = $('.vbar', tile);
+          if (!bar) { bar = el('i', { className: 'vbar' }); tile.appendChild(bar); }
+          bar.style.width = on ? pct(c, n) + '%' : '0'; bar.classList.toggle('lead', top);
+          if (tag) { tag.innerHTML = on ? `<small>Room</small>${pct(c, n)}%` : ''; tag.classList.toggle('on', on); tag.classList.toggle('lead', top); }
         });
         const note = $('.qnote', box.closest('.slide'));
-        if (note && active === id) note.textContent = `${n ? 'Votes are in.' : 'Waiting for votes.'} Vote at ${V.SHORT}/v`;
+        if (note && active === id) note.textContent = n ? (shown ? 'The red badges show how the room voted.' : 'Votes are in. Reveal to see how the room voted.') : `Waiting for votes. Vote at ${V.SHORT}/v`;
       });
+      roomGuess();
       const st = tallies.steal || {};
-      const sn = total(st);
-      $$('.fv').forEach(e => { e.textContent = st[e.dataset.key] ? pct(st[e.dataset.key], sn) + '%' : ''; });
+      const sn = total(st), slead = Math.max(0, ...Object.values(st));
+      $$('.fv').forEach(e => { const c = st[e.dataset.key] || 0; e.textContent = c ? pct(c, sn) + '%' : ''; e.classList.toggle('lead', c > 0 && c === slead); });
       stat.textContent = !online ? 'Voting offline' : active ? (total(tallies[active]) ? 'Voting open · votes in' : 'Voting open') : 'Voting ready';
       stat.classList.toggle('bad', !online);
     }
